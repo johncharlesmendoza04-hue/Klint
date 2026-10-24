@@ -163,7 +163,7 @@ kbd span{font:11px ui-monospace,monospace;background:#2a2a2a;color:var(--muted);
     <symbol id="bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
     <symbol id="external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
     <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-    <symbol id="chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></symbol>
+    <symbol id="bubble" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></symbol>
     <symbol id="panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></symbol>
     <symbol id="code" viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></symbol>
     <symbol id="eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
@@ -192,8 +192,8 @@ kbd span{font:11px ui-monospace,monospace;background:#2a2a2a;color:var(--muted);
       <div class="logo"><svg><use href="#mark"/></svg></div>
       <button class="icon-btn" id="closeSb" title="Hide sidebar"><svg class="i"><use href="#panel"/></svg></button>
     </div>
-    <button class="newchat" id="newChat"><svg class="i"><use href="#chat"/></svg>New chat<kbd><span>Ctrl</span><span>K</span></kbd></button>
-    <button class="nav on" data-mode="chat"><svg class="i"><use href="#chat"/></svg>Chat</button>
+    <button class="newchat" id="newChat"><svg class="i"><use href="#bubble"/></svg>New chat<kbd><span>Ctrl</span><span>K</span></kbd></button>
+    <button class="nav on" data-mode="chat"><svg class="i"><use href="#bubble"/></svg>Chat</button>
     <button class="nav" data-mode="web"><svg class="i"><use href="#layout"/></svg>Websites</button>
     <button class="nav" data-mode="game"><svg class="i"><use href="#game"/></svg>Games</button>
     <button class="nav" data-mode="dash"><svg class="i"><use href="#chart"/></svg>Dashboards</button>
@@ -316,7 +316,7 @@ const TIERS = {
   lite: { name:"Klint 8 Fast", tag:"Fast", icon:"bolt",  desc:"Quicker, more concise answers",     hint:"\n\n# Effort\nPrioritize speed: keep explanations minimal and get to the result quickly, while keeping any code complete and working." }
 };
 const MODES = {
-  chat:{ title:'What are we <em>building</em> today?', ph:"Ask anything, or describe what to build...", hint:"", icon:"chat", chips:[
+  chat:{ title:'What are we <em>building</em> today?', ph:"Ask anything, or describe what to build...", hint:"", icon:"bubble", chips:[
     ["layout","Landing page","Design a stunning modern landing page for a SaaS startup with hero, features, pricing and footer"],
     ["chart","Dashboard","Build a polished analytics dashboard with charts, KPI cards and a sidebar"],
     ["game","Game","Build a fun, smooth, fully playable snake game with score and difficulty levels"],
