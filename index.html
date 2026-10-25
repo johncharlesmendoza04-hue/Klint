@@ -197,6 +197,29 @@ kbd span{font:11px ui-monospace,monospace;background:#2a2a2a;color:var(--muted);
 .lv-rs{position:absolute;right:0;bottom:0;width:22px;height:22px;cursor:nwse-resize;touch-action:none;display:grid;place-items:center;z-index:2}
 .lv-rs svg{width:13px;height:13px;stroke:#777;stroke-width:1.6;fill:none;stroke-linecap:round}
 .lv.full .lv-rs{display:none}
+.srow.col{flex-direction:column;align-items:stretch;gap:8px}
+.keyrow{display:flex;gap:8px;align-items:center}
+.tin{flex:1;min-width:0;width:100%;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:8px 11px;font:inherit;font-size:13px;outline:0}
+.tin:focus{border-color:var(--accent)}
+select.tin{appearance:auto}
+.gem-msg{font-size:12.5px;line-height:1.45;min-height:0;color:var(--muted)}
+.gem-msg.ok{color:var(--ok)}.gem-msg.bad{color:#ff8b8b}
+.kstat{display:inline-flex;align-items:center;gap:7px;padding:3px 10px 3px 8px;border-radius:999px;font-size:12px;font-weight:600;background:var(--card);border:1px solid var(--line2);color:var(--muted);white-space:nowrap;transition:color .2s,border-color .2s,background .2s}
+.kstat i{width:8px;height:8px;border-radius:50%;background:var(--dim);flex:none;display:block}
+.kstat.checking i{background:#ffb454;animation:pulse 1s ease-in-out infinite}
+.kstat.active{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.kstat.active i{background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 25%,transparent)}
+.kstat.warn{color:#ffb454;border-color:rgba(255,180,84,.45);background:rgba(255,180,84,.1)}.kstat.warn i{background:#ffb454}
+.kstat.error{color:#ff6b6b;border-color:rgba(255,107,107,.45);background:rgba(255,107,107,.1)}.kstat.error i{background:#ff6b6b}
+.krow-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.model{position:relative}
+.model>b::after{content:"";display:none;width:7px;height:7px;border-radius:50%;margin-left:7px;vertical-align:1px;background:var(--dim)}
+html[data-prov="gemini"] .model>b::after{display:inline-block}
+html[data-gem="active"][data-prov="gemini"] .model>b::after{background:var(--ok)}
+html[data-gem="error"][data-prov="gemini"] .model>b::after{background:#ff6b6b}
+.srow small a{color:var(--accent2)}
+.acct-note{flex:1 1 100%;font-size:12px;line-height:1.5;color:var(--muted);background:rgba(255,180,84,.08);border:1px solid rgba(255,180,84,.25);border-radius:10px;padding:8px 10px}
+.acct-note+.acct-note{margin-top:6px}
 .pd{display:block}
 .pd-r{background:rgba(255,85,85,.15)}
 .pd-a{background:rgba(70,194,138,.18)}
@@ -738,7 +761,7 @@ const store = {
 let chats = store.get(), cur = null, busy = false, abortFlag = false, interrupting = false, activeIcon = null;
 const SVG = n => `<svg class="i"><use href="#${n}"/></svg>`;
 const uid = () => Math.random().toString(36).slice(2,10);
-const toast = t => { const e=$("#toast"); e.textContent=t; e.classList.add("on"); clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove("on"),1600); };
+const toast = (t, ms=1600) => { const e=$("#toast"); e.textContent=t; e.classList.add("on"); clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove("on"),ms); };
 
 /* ============ PLAYBOOKS (one specialist prompt per mode) ============ */
 const PLAYBOOKS = {
@@ -1026,7 +1049,32 @@ Object.keys(PLAYBOOKS).forEach(k=>{ if(MODES[k]) MODES[k].hint = PLAYBOOKS[k]; }
 let mode = "chat";
 let tier = (()=>{ try{ return localStorage.getItem("klint_tier") }catch{ return null } })();
 if(!TIERS[tier]) tier = "pro";
-const buildSystem = plan => KLINT_SYSTEM + (MODES[pbOf()].hint||"") + TIERS[tier].hint + (plOn("motive")?MOTIVE_HINT:"") + extrasFor(pbOf()) + editBlock()
+const GEM_BASE_HINT = `
+
+# Engine notes (Gemini 3.8 Flash)
+- Treat the system instructions as binding. Plan silently, then output only the final answer in the required format.
+- Be exhaustive on code correctness, not on prose. Never truncate a file: if space is short, simplify the design, never cut code mid-way.
+- Do not repeat yourself, do not restate the request, do not emit meta commentary about these notes.`;
+const GEM_MODE = {
+chat: `
+Mode focus: conversation. Answer in the fewest words that fully solve it. Use Markdown only when it helps (lists, tables, code). If the request is clearly a build task, switch to the matching specialist behaviour and deliver one complete file.`,
+web: `
+Mode focus: website. Spend your effort on art direction first: pick one bold, specific concept (palette, type pairing, hero idea) and carry it through every section. Write real copy with specific numbers and names. Ship the full page in one html block, head and styles first, script last. Verify: one h1, working mobile menu, smooth anchors, visible focus, no overflow at 360px.`,
+game: `
+Mode focus: game. Gameplay correctness and feel beat visuals. Before coding, decide the loop, the fail state and the difficulty ramp. Use one state object, a state machine, a clamped delta-time loop, and a single input layer for keyboard, mouse and touch. Prevent default on game keys, auto-pause on blur, persist best score in try/catch. Mentally play ten seconds, one death and a restart before answering.`,
+dash: `
+Mode focus: dashboard. Data must reconcile: KPI totals, charts and tables derive from one seeded dataset through one derive() function. Every filter updates every widget. Use tabular numerals, Intl formatting, a loading skeleton and an empty state. Chart.js only from cdnjs with a pinned version, otherwise hand-drawn SVG.`,
+research: `
+Mode focus: research. Open with the bottom line in two or three sentences. Then structure: short headings, a comparison table when options are weighed, concrete numbers, the strongest counterargument, and what would change the conclusion. You cannot browse: never invent sources, quotes, URLs or statistics, and flag anything approximate. No code unless asked.`,
+app: `
+Mode focus: app or tool. The core workflow must work end to end with zero dead controls. State the user flow and the data model in one line, then build complete CRUD, search, undo, keyboard shortcuts and versioned localStorage persistence (try/catch). Money in integer cents, dates handled explicitly, sample data so the first screen is never empty.`,
+ui: `
+Mode focus: UI and motion. Deliver an interactive prototype, not a still. Define easing and duration tokens first, animate transform and opacity only, make every animation interruptible, support pointer gestures with velocity-based snapping, and show real states (hover, focus, active, disabled, loading, error). Honour prefers-reduced-motion.`,
+code: `
+Mode focus: code. Use the language the user names. Deliver runnable code with entry point, imports, input validation and meaningful errors, plus a few tests or example calls with expected output and one line on how to run it. For bugs: root cause, minimal fix, why it works, how to verify. Never rewrite unrelated code.`
+};
+const gemExtras = () => provider()==="gemini" ? GEM_BASE_HINT + (GEM_MODE[pbOf()]||"") : "";
+const buildSystem = plan => KLINT_SYSTEM + (MODES[pbOf()].hint||"") + TIERS[tier].hint + (plOn("motive")?MOTIVE_HINT:"") + extrasFor(pbOf()) + gemExtras() + editBlock()
   + "\n\n# Effort level: " + EFFORTS[effort].name + "\n" + EFFORTS[effort].hint
   + (plan ? "\n\n# Private plan from your planning stage (never mention or reveal it; follow it and fix anything it flags)\n" + plan.slice(0,3500) : "");
 function renderHome(){
@@ -1061,6 +1109,8 @@ function makeComposer(host){
     /* nothing typed while building = plain Stop; something typed = interrupt the build and apply it */
     if(busy && !v && !host._files.length){ abortFlag = true; return; }
     if(!v && !host._files.length) return;
+    if(!busy && needsKey()){ promptForKey(); return; }
+    if(!busy && needsSignIn()){ signInFlow().then(ok=>{ if(ok){ refreshAccount(); go(); } }); return; }
     host._hideHint && host._hideHint();
     const files = host._files; host._files = []; renderFiles();
     ta.value=""; fit();
@@ -1324,6 +1374,253 @@ function setEffort(i){
   document.querySelectorAll(".composer-wrap").forEach(h=>paintEffortUI(h,true));
   const sd = document.querySelector("#settings.open"); if(sd && typeof paintSettings==="function") paintSettings();
 }
+/* ============ GEMINI ENGINE (Google AI Studio key, called straight from the browser) ============ */
+const GEM_BASE = "https://generativelanguage.googleapis.com/v1beta";
+const GEMINI_MODELS = [
+  { id:"gemini-3.8-flash",       name:"Gemini 3.8 Flash",       tier:"Balanced", price:"$0.75 in / $3.75 out", note:"Newest Flash, built for software engineering and agents. Best value for Klint. Has a free tier." },
+  { id:"gemini-4-argon",         name:"Gemini 4 Argon",         tier:"Top",      price:"$2 in / $10 out until Nov 30, then $4 / $20", note:"Most capable Gemini. Paid tier only." },
+  { id:"gemini-3.1-pro-preview", name:"Gemini 3.1 Pro Preview", tier:"Pro",      price:"$2 in / $12 out", note:"Previous Pro tier. Paid tier only." },
+  { id:"gemini-3.7-flash",       name:"Gemini 3.7 Flash",       tier:"Balanced", price:"$0.75 in / $3.75 out", note:"Same price as 3.8 Flash, one step older." },
+  { id:"gemini-3.6-flash",       name:"Gemini 3.6 Flash",       tier:"Balanced", price:"$0.75 in / $3.75 out", note:"Stable older Flash, uses fewer tokens than 3.5." },
+  { id:"gemini-3.5-flash",       name:"Gemini 3.5 Flash",       tier:"Balanced", price:"about $1.50 in / $9 out", note:"Superseded by 3.6 to 3.8 Flash at a lower price." },
+  { id:"gemini-3.5-flash-lite",  name:"Gemini 3.5 Flash-Lite",  tier:"Budget",   price:"$0.30 in / $2.50 out", note:"Cheapest current model. Fine for simple pages, weaker on big builds." },
+  { id:"gemini-3.1-flash-lite",  name:"Gemini 3.1 Flash-Lite",  tier:"Budget",   price:"$0.25 in / $1.50 out", note:"Budget model, scheduled to shut down in 2027." },
+  { id:"gemini-3-flash-preview", name:"Gemini 3 Flash Preview", tier:"Balanced", price:"$0.50 in / $3 out", note:"Preview model, may change." },
+  { id:"gemini-2.5-pro",         name:"Gemini 2.5 Pro",         tier:"Legacy",   price:"$1.25 in / $10 out", note:"Legacy. May be closed to new projects." },
+  { id:"gemini-2.5-flash",       name:"Gemini 2.5 Flash",       tier:"Legacy",   price:"$0.30 in / $2.50 out", note:"Legacy. May be closed to new projects." },
+  { id:"gemini-2.5-flash-lite",  name:"Gemini 2.5 Flash-Lite",  tier:"Legacy",   price:"$0.10 in / $0.40 out", note:"Legacy and cheapest. May be closed to new projects." }
+];
+const FAST_GEM = "gemini-3.5-flash-lite";   /* used for side tasks (titles, suggestions) when the main model is Pro or Argon */
+const provider = () => PREFS.get("provider","gemini");
+const gemKey = () => PREFS.get("gem_key","");
+const gemModel = () => PREFS.get("gem_model","gemini-3.8-flash");
+const needsKey = () => provider()==="gemini" && !gemKey();
+function gemList(){
+  let loaded = []; try{ loaded = JSON.parse(PREFS.get("gem_models","[]")) || []; }catch(_){}
+  if(!loaded.length) return GEMINI_MODELS;
+  const ids = new Set(loaded.map(m=>m.id));
+  const known = GEMINI_MODELS.filter(m=>ids.has(m.id));
+  if(!known.length) return GEMINI_MODELS.concat(loaded);
+  const kset = new Set(known.map(m=>m.id));
+  return known.concat(loaded.filter(m=>!kset.has(m.id)).map(m=>({ id:m.id, name:m.name, tier:"Other", price:"", note:"Available to your key." })));
+}
+class GemError extends Error{ constructor(msg, status, code){ super(msg); this.status = status||0; this.code = code||""; } }
+function gemFriendly(status, err, model){
+  const m = String((err && err.message) || "");
+  if(status===400 && /api key/i.test(m)) return "Google rejected your API key. Copy it again from aistudio.google.com/apikey and paste it in Settings.";
+  if(status===400) return "Gemini rejected the request: " + m;
+  if(status===401 || status===403) return "Gemini denied access. Check that the key is valid, that billing is on if the model is paid only, and that your region is supported. " + m;
+  if(status===404) return "The model " + (model||"") + " is not available to your key. Pick another one in Settings, or press Load my models.";
+  if(status===429) return "Gemini rate limit or free quota reached. Wait a minute, pick a Flash model, or turn on billing in Google AI Studio.";
+  if(status>=500) return "Gemini is overloaded or down right now (" + status + "). Try again in a moment or pick another model.";
+  return m || ("Gemini error " + status);
+}
+function gemContents(history){
+  return history.map(m=>{
+    const parts = [];
+    (m.images||[]).forEach(u=>{ const x = /^data:([^;,]+);base64,(.*)$/.exec(u||""); if(x) parts.push({ inlineData:{ mimeType:x[1], data:x[2] } }); });
+    parts.push({ text: (m.content && String(m.content).trim()) ? m.content : " " });
+    return { role: m.role==="assistant" ? "model" : "user", parts };
+  });
+}
+/* Klint's effort level -> Gemini thinking control (3.x and Argon use levels, 2.5 uses a token budget) */
+function gemThinking(model, low){
+  const lvl = low ? "low" : EFFORTS[effort].api;
+  if(/^gemini-2\.5/.test(model)){
+    const pro = /pro/.test(model);
+    const b = low ? (pro?128:0) : ({minimal:(pro?128:0), low:1024, medium:4096, high:12288}[lvl] ?? 4096);
+    return { thinkingBudget:b };
+  }
+  return { thinkingLevel: lvl==="minimal" ? "low" : lvl };
+}
+async function gemFetch(model, stream, body, signal){
+  const key = gemKey();
+  if(!key) throw new GemError("Add your Gemini API key in Settings first.", 0, "no_key");
+  const url = GEM_BASE + "/models/" + encodeURIComponent(model) + (stream ? ":streamGenerateContent?alt=sse" : ":generateContent");
+  let res;
+  try{ res = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json", "x-goog-api-key":key }, body:JSON.stringify(body), signal }); }
+  catch(e){
+    if(e && e.name==="AbortError") throw e;
+    throw new GemError("Could not reach the Gemini API. Check your connection, or whether a VPN, firewall or ad blocker is blocking googleapis.com.", 0, "network");
+  }
+  if(!res.ok){
+    let j = null; try{ j = await res.json(); }catch(_){}
+    const err = (j && j.error) || {};
+    if(res.status===400 && /api key/i.test(String(err.message||"")) || res.status===401 || res.status===403) setGemStat("error", gemFriendly(res.status, err, model));
+    throw new GemError(gemFriendly(res.status, err, model), res.status, err.status);
+  }
+  return res;
+}
+async function gemReadSSE(res, onText, shouldStop){
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = "", finish = "", any = false;
+  const handle = j => {
+    if(j.error) throw new GemError(gemFriendly(j.error.code||0, j.error), j.error.code||0, j.error.status);
+    const c = j.candidates && j.candidates[0];
+    if(!c){ if(j.promptFeedback && j.promptFeedback.blockReason) throw new GemError("Gemini blocked this prompt (" + j.promptFeedback.blockReason + "). Try rewording it.", 0, "blocked"); return; }
+    for(const p of ((c.content && c.content.parts) || [])){ if(p.thought) continue; if(typeof p.text==="string" && p.text){ any = true; onText(p.text); } }
+    if(c.finishReason) finish = c.finishReason;
+  };
+  const flush = chunk => {
+    const data = chunk.split(/\r?\n/).filter(l=>l.startsWith("data:")).map(l=>l.slice(5).replace(/^ /,"")).join("\n");
+    if(!data || data==="[DONE]") return;
+    let j; try{ j = JSON.parse(data); }catch(_){ return; }
+    handle(j);
+  };
+  for(;;){
+    if(shouldStop()){ try{ await reader.cancel(); }catch(_){} return; }
+    const { value, done } = await reader.read();
+    if(done) break;
+    buf += dec.decode(value, { stream:true });
+    let m;
+    while((m = /\r?\n\r?\n/.exec(buf))){ flush(buf.slice(0, m.index)); buf = buf.slice(m.index + m[0].length); }
+  }
+  if(buf.trim()) flush(buf);
+  if(!any && finish && finish!=="STOP") throw new GemError("Gemini stopped without replying (" + finish + "). Try rewording the request.", 0, finish);
+}
+async function geminiStream(history, onToken, system){
+  const model = gemModel(), contents = gemContents(history);
+  let lastErr;
+  for(const withThink of [true, false]){
+    const body = { systemInstruction:{ parts:[{ text: system || " " }] }, contents,
+      generationConfig:{ maxOutputTokens:65536, ...(withThink ? { thinkingConfig: gemThinking(model) } : {}) } };
+    const ctl = new AbortController();
+    const watch = setInterval(()=>{ if(abortFlag) ctl.abort(); }, 120);
+    let got = false;
+    try{
+      const res = await gemFetch(model, true, body, ctl.signal);
+      await gemReadSSE(res, t=>{ got = true; onToken(t); }, ()=>abortFlag);
+      return;
+    }catch(e){
+      if(abortFlag || (e && e.name==="AbortError")) return;
+      lastErr = e;
+      if(!got && withThink && e && e.status===400 && /think/i.test(e.message||"")) continue;   /* model rejected the thinking setting: retry without it */
+      throw e;
+    }finally{ clearInterval(watch); }
+  }
+  throw lastErr;
+}
+async function geminiOnce(msgs, model, maxTok){
+  const sys = msgs.filter(m=>m.role==="system").map(m=>m.content).join("\n\n");
+  const contents = gemContents(msgs.filter(m=>m.role!=="system"));
+  let lastErr;
+  for(const withThink of [true, false]){
+    const body = { ...(sys ? { systemInstruction:{ parts:[{ text:sys }] } } : {}), contents,
+      generationConfig:{ maxOutputTokens:maxTok||8192, ...(withThink ? { thinkingConfig: gemThinking(model, true) } : {}) } };
+    try{
+      const res = await gemFetch(model, false, body);
+      const j = await res.json();
+      const c = j.candidates && j.candidates[0];
+      if(!c){ if(j.promptFeedback && j.promptFeedback.blockReason) throw new GemError("Gemini blocked this prompt (" + j.promptFeedback.blockReason + ").", 0, "blocked"); return ""; }
+      return ((c.content && c.content.parts) || []).filter(p=>!p.thought && typeof p.text==="string").map(p=>p.text).join("");
+    }catch(e){
+      lastErr = e;
+      if(withThink && e && e.status===400 && /think/i.test(e.message||"")) continue;
+      throw e;
+    }
+  }
+  throw lastErr;
+}
+/* one non-streaming call for the planner (side=false) and for titles and suggestions (side=true) */
+async function llmOnce(msgs, side){
+  if(provider()==="puter"){
+    for(const model of [BASE_MODEL, FALLBACK_MODEL]){
+      try{ const o = { stream:false }; if(model) o.model = model; const t = textOf(await puter.ai.chat(msgs, o)).trim(); if(t) return t; }catch(_){}
+    }
+    return "";
+  }
+  const sel = gemModel(), model = (side && /argon|pro/i.test(sel)) ? FAST_GEM : sel;
+  try{ return await geminiOnce(msgs, model); }
+  catch(e){ if(model !== sel) return await geminiOnce(msgs, sel); throw e; }
+}
+/* ---- API key status: Not set / Checking / Active / Limited / Error ---- */
+const GemStat = { state:"none", msg:"", sig:"", seq:0, timer:0 };
+const keyKind = k => !k ? "" : (/^AIza[0-9A-Za-z_-]{35}$/.test(k) ? "Google AI Studio key" : (/^AIza/.test(k) ? "AI Studio key (unusual length)" : "Unrecognised key format"));
+function gemStatText(){
+  const k = gemKey(), kind = keyKind(k), S = GemStat;
+  if(!k) return { cls:"", label:"No key", detail:"Paste a key from aistudio.google.com/apikey." };
+  if(S.state==="checking") return { cls:"checking", label:"Checking...", detail:"Contacting Google. " + kind + "." };
+  if(S.state==="active")   return { cls:"active", label:"Active", detail:S.msg || (kind + ". Key accepted by Google.") };
+  if(S.state==="warn")     return { cls:"warn", label:"Active, limited", detail:S.msg };
+  if(S.state==="error")    return { cls:"error", label:"Error", detail:S.msg };
+  return { cls:"", label:"Not checked", detail:kind + ". Press Test to verify." };
+}
+function paintGemStat(){
+  const t = gemStatText();
+  document.documentElement.dataset.gem = GemStat.state==="warn" ? "active" : (gemKey() ? GemStat.state : "none");
+  document.documentElement.dataset.prov = provider();
+  const pill = $("#gemPill"); if(pill){ pill.className = "kstat " + t.cls; pill.innerHTML = "<i></i>" + esc(t.label); }
+  const msg = $("#gemMsg"); if(msg && !msg._lock){ msg.textContent = t.detail; msg.className = "gem-msg " + (t.cls==="active" ? "ok" : (t.cls==="error" ? "bad" : "")); }
+}
+function setGemStat(state, msg){ GemStat.state = state; GemStat.msg = msg||""; GemStat.sig = gemKey()+"|"+gemModel(); paintGemStat(); }
+/* Free check: asks Google for the model's metadata. Uses no tokens and no quota. */
+async function checkGemKey(){
+  const key = gemKey(), model = gemModel(), seq = ++GemStat.seq;
+  if(!key){ setGemStat("none"); return; }
+  setGemStat("checking");
+  try{
+    const res = await fetch(GEM_BASE + "/models/" + encodeURIComponent(model), { headers:{ "x-goog-api-key":key } });
+    if(seq !== GemStat.seq) return;
+    if(res.ok) return setGemStat("active", keyKind(key) + ". Key accepted, " + model + " is available.");
+    let j = null; try{ j = await res.json(); }catch(_){}
+    const e = (j && j.error) || {}, m = String(e.message||"");
+    if(res.status===404) return setGemStat("warn", "Key works, but " + model + " is not available to it. Pick another model or press Load my models.");
+    if(res.status===429) return setGemStat("warn", "Key works, but you hit the rate or free quota limit right now.");
+    if(res.status===400 && /api key/i.test(m)) return setGemStat("error", "Google says this key is invalid. Copy it again from aistudio.google.com/apikey.");
+    if(res.status===400 && /expired/i.test(m)) return setGemStat("error", "This key has expired. Create a new one in Google AI Studio.");
+    if(res.status===401 || res.status===403) return setGemStat("error", "Access denied. The key is disabled, restricted to other sites, or your region is not supported. " + m);
+    setGemStat("error", gemFriendly(res.status, e, model));
+  }catch(e){
+    if(seq !== GemStat.seq) return;
+    setGemStat("error", "Could not reach Google. Check your connection, VPN, firewall or ad blocker (googleapis.com).");
+  }
+}
+function scheduleGemCheck(){ clearTimeout(GemStat.timer); GemStat.seq++; if(!gemKey()){ setGemStat("none"); return; } GemStat.state = "none"; paintGemStat(); GemStat.timer = setTimeout(checkGemKey, 700); }
+async function geminiTest(){
+  const msgEl = $("#gemMsg");
+  if(!gemKey()){ setGemStat("none"); return; }
+  const seq = ++GemStat.seq; setGemStat("checking");
+  if(msgEl){ msgEl._lock = true; msgEl.className = "gem-msg"; msgEl.textContent = "Sending a real test message to " + gemModel() + "..."; }
+  try{
+    const t = await geminiOnce([{ role:"user", content:"Reply with the single word: ready" }], gemModel(), 2048);
+    if(seq !== GemStat.seq) return;
+    if(msgEl) msgEl._lock = false;
+    setGemStat("active", "Working. " + gemModel() + " replied: " + (t.trim().slice(0,40) || "(empty)"));
+  }catch(e){
+    if(seq !== GemStat.seq) return;
+    if(msgEl) msgEl._lock = false;
+    const quota = e && e.status===429;
+    setGemStat(quota ? "warn" : "error", (e && e.message) || "Test failed.");
+  }
+}
+async function gemLoadModels(){
+  const say = (t, ok) => { const el = $("#gemMsg"); if(el){ el.textContent = t; el.className = "gem-msg " + (ok ? "ok" : "bad"); } };
+  if(!gemKey()) return say("Paste your API key first.", false);
+  say("Loading the models your key can use...", true);
+  try{
+    const res = await fetch(GEM_BASE + "/models?pageSize=1000", { headers:{ "x-goog-api-key": gemKey() } });
+    if(!res.ok){ let j = null; try{ j = await res.json(); }catch(_){} throw new GemError(gemFriendly(res.status, (j && j.error) || {}), res.status); }
+    const j = await res.json();
+    const ms = (j.models||[])
+      .filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent") && /^models\/gemini-/.test(m.name) && !/tts|image|embedding|live|audio|robotics|computer-use|omni|transcribe|lyria|veo|imagen|native/i.test(m.name))
+      .map(m=>({ id:m.name.replace(/^models\//,""), name:m.displayName || m.name }));
+    PREFS.set("gem_models", JSON.stringify(ms));
+    paintSettings();
+    const el = $("#gemMsg"); if(el){ el.textContent = "Found " + ms.length + " chat models for your key."; el.className = "gem-msg ok"; }
+  }catch(e){ say((e && e.message) || "Could not load models.", false); }
+}
+function geminiPanel(){
+  const cur = gemModel(), list = gemList(), info = list.find(m=>m.id===cur);
+  const opts = list.map(m=>`<option value="${esc(m.id)}"${m.id===cur?" selected":""}>${esc(m.name)}${m.tier?" ("+esc(m.tier)+")":""}${m.price?" - "+esc(m.price):""}</option>`).join("");
+  return `
+        <div class="srow col"><div class="krow-h"><div><b>Gemini API key</b><small>Saved only in this browser and sent only to Google. <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a free key</a></small></div><span class="kstat" id="gemPill"><i></i>Not checked</span></div>
+          <div class="keyrow"><input type="password" id="gemKey" class="tin" placeholder="Paste your key (starts with AIza)" value="${esc(gemKey())}" autocomplete="off" spellcheck="false"><button type="button" class="btn" data-s="gem-show">Show</button><button type="button" class="btn primary" data-s="gem-test">Test</button></div>
+          <div class="gem-msg" id="gemMsg"></div></div>
+        <div class="srow col"><div><b>Gemini model</b><small>${esc(info ? info.note : "Custom model id.")}</small></div>
+          <select id="gemModel" class="tin">${opts}${info ? "" : `<option value="${esc(cur)}" selected>${esc(cur)} (custom)</option>`}</select>
+          <div class="keyrow"><input type="text" id="gemCustom" class="tin" placeholder="Other model id, for example gemini-4-argon" autocomplete="off" spellcheck="false"><button type="button" class="btn" data-s="gem-custom">Use</button><button type="button" class="btn" data-s="gem-load">Load my models</button></div></div>`;
+}
+
 const textOf = r => {
   if(!r) return "";
   const c = r.message?.content ?? r.text ?? "";
@@ -1340,18 +1637,13 @@ async function makePlan(history){
   const sys = "You are the private planning stage of Klint, a senior engineer and designer. Read the conversation and write a working plan for the final answer. Do NOT write the answer. Plain text, at most "+words+" words, covering: (1) the user's real goal and constraints, (2) key decisions on structure, design or architecture, (3) edge cases and pitfalls to handle, (4) a short verification checklist. For builds the checklist must include: every icon is an inline SVG with a viewBox and visible size, layout holds at 360px, 768px and desktop, every control works. No code beyond 3 lines."+(MODES[mode].hint||"");
   const msgs = [{role:"system", content:sys}, ...history.map(m=>({role:m.role, content:m.content}))];
   const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error("plan timeout")), 30000));
-  for(const model of [BASE_MODEL, FALLBACK_MODEL]){
-    try{
-      const o = { stream:false }; if(model) o.model = model;
-      const t = textOf(await Promise.race([puter.ai.chat(msgs, o), timeout])).trim();
-      if(t) return t;
-    }catch(_){}
-  }
+  try{ const t = (await Promise.race([llmOnce(msgs, false), timeout])).trim(); if(t) return t; }catch(_){}
   return "";
 }
 
 /* ============ AI ============ */
 async function streamAI(history, onToken, system){
+  if(provider()==="gemini") return geminiStream(history, onToken, system);
   const hasImg = history.some(m=>m.images&&m.images.length);
   const msgs = [{role:"system", content:system || buildSystem()}, ...history.map(m=>({role:m.role, content: (m.images&&m.images.length) ? [{type:"text",text:m.content}, ...m.images.map(u=>({type:"image_url", image_url:{url:u}}))] : m.content}))];
   const run = async (model, extra) => {
@@ -1392,6 +1684,8 @@ async function streamAI(history, onToken, system){
 
 async function submit(text, shown, images){
   if(busy) return;
+  if(needsKey()){ promptForKey(); return; }
+  if(needsSignIn()){ const ok = await signInFlow(); if(!ok) return; refreshAccount(); }
   let c = chats.find(x=>x.id===cur);
   if(!c){ c = {id:uid(), title:(shown||text).replace(/\s+/g," ").slice(0,42), messages:[]}; chats.push(c); cur=c.id; }
   c.messages.forEach(m=>{ delete m.suggest; });
@@ -1473,9 +1767,10 @@ async function respond(c){
         await streamAI(c.messages, onTok, buildSystem(lastPlan) + (agentRes ? agentRes.notes : ""));
       }
     }
-    if(!full.trim()) throw new Error("No response received. Make sure Puter is reachable and sign in if prompted.");
+    if(!full.trim()) throw new Error(provider()==="gemini" ? "No response received from Gemini. Check your key and model in Settings." : "No response received. Make sure Puter is reachable and sign in if prompted.");
   }catch(e){
-    const msg = (e && (e.message || e.error?.message || (typeof e==="string"?e:""))) || "Something went wrong.";
+    let msg = (e && (e.message || e.error?.message || e.msg || (typeof e==="string"?e:""))) || "Something went wrong.";
+    if(provider()==="puter" && /token|unauthori|401|not signed|sign.?in|auth/i.test(String((e&&(e.code||e.error&&e.error.code))||"")+" "+msg)) msg += " Open Settings, then Account, and sign in again.";
     if(!full) { mdEl.innerHTML = `<div class="err">${esc(msg)}</div>`; }
     else full += "\n\n_Generation interrupted._";
     failed = true;
@@ -1724,13 +2019,7 @@ const stripCode = s => (s||"").replace(/```[\s\S]*?(```|$)/g,"[code omitted]");
 async function quickChat(sys, user, ms){
   const msgs = [{role:"system",content:sys},{role:"user",content:user}];
   const timeout = new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")), ms||12000));
-  for(const model of [BASE_MODEL, FALLBACK_MODEL]){
-    try{
-      const o = { stream:false }; if(model) o.model = model;
-      const t = textOf(await Promise.race([puter.ai.chat(msgs,o), timeout])).trim();
-      if(t) return t;
-    }catch(_){}
-  }
+  try{ const t = (await Promise.race([llmOnce(msgs, true), timeout])).trim(); if(t) return t; }catch(_){}
   return "";
 }
 
@@ -1973,33 +2262,77 @@ function applyTheme(){
 function applyFs(){ document.documentElement.dataset.fs = PREFS.get("fs","m"); }
 lightMQ.addEventListener?.("change", ()=>{ if(PREFS.get("theme","dark")==="system") applyTheme(); });
 
-let acct = { user:null, err:"", loading:false };
-function errMsg(e){
-  return (e && (e.message || e.msg || (typeof e.error==="string" && e.error) || e.error?.message || (typeof e==="string" && e))) || "Sign in failed or the popup was blocked";
+/* ============ PUTER SIGN-IN ============ */
+/* true = signed in, false = signed out, null = unknown */
+function authState(){
+  try{
+    if(typeof puter==="undefined" || !puter.auth) return null;
+    const r = puter.auth.isSignedIn();
+    if(r && typeof r.then==="function") return null;
+    return !!r;
+  }catch(_){ return null; }
 }
-function hardResetAuth(){
-  try{ puter.resetAuthToken && puter.resetAuthToken(); }catch{}
-  try{ puter.auth.signOut(); }catch{}   /* no await, keeps the next signIn tied to the click */
-  try{ Object.keys(localStorage).filter(k=>/^puter/i.test(k)).forEach(k=>localStorage.removeItem(k)); }catch{}
+const needsSignIn = () => provider()==="puter" && authState() === false;
+function promptForKey(){
+  toast("Add your Gemini API key in Settings to start", 4000);
+  openSettings();
+  setTimeout(()=>{ const k = $("#gemKey"); if(k){ k.focus(); k.scrollIntoView({block:"center"}); } }, 80);
 }
+function authHints(){
+  const h = [];
+  if(location.protocol === "file:") h.push("This page is opened from a file. The Puter sign-in window cannot report back to a file page, so serve it over http(s), for example from localhost or any web host.");
+  if(window.crossOriginIsolated) h.push("This page is cross-origin isolated (COOP/COEP headers), which blocks the Puter sign-in window. Turn those headers off for this server.");
+  try{ if(window.self !== window.top) h.push("Klint is running inside a frame, where browsers often block the sign-in window. Open it in its own browser tab."); }
+  catch(_){ h.push("Klint is running inside a frame, where browsers often block the sign-in window. Open it in its own browser tab."); }
+  return h;
+}
+function authError(err){
+  const code = String((err && (err.error && err.error.code || err.error || err.code)) || "").toLowerCase();
+  const msg = String((err && (err.msg || err.message || (err.error && err.error.message))) || "");
+  if(/popup/.test(code) || /popup/i.test(msg)) return "Your browser blocked the Puter sign-in window. Allow pop-ups for this page, then try again.";
+  if(/closed/.test(code) || /closed/i.test(msg)) return "The Puter sign-in window was closed before it finished.";
+  const h = authHints(); if(h.length) return h[0];
+  return msg || code || "Puter sign-in failed. Try again.";
+}
+/* Must be called straight from a click or key press (before any await) so the browser lets the sign-in window open. */
+let signingIn = null;
+function signInFlow(){
+  if(signingIn) return signingIn;
+  if(typeof puter==="undefined" || !puter.auth){ toast("Puter could not be reached. Check your connection.", 5000); return Promise.resolve(false); }
+  let p;
+  try{ p = puter.auth.signIn(); }catch(e){ toast(authError(e), 7000); return Promise.resolve(false); }
+  toast("Opening Puter sign-in...");
+  signingIn = Promise.resolve(p).then(()=>{ toast("Signed in"); return true; }, err=>{ toast(authError(err), 7000); return false; }).finally(()=>{ signingIn = null; });
+  return signingIn;
+}
+/* Switch account: signOut is synchronous, so signIn still counts as a direct click and the popup is allowed. */
+async function switchAccount(){
+  const prev = acct.user && acct.user.username;
+  try{ puter.auth.signOut(); }catch(_){}
+  const ok = await signInFlow();
+  if(!ok){ refreshAccount(); return; }
+  let u = null; try{ u = await puter.auth.getUser(); }catch(_){}
+  acct = { user:u, err:"", loading:false, note:(u && prev && u.username===prev) ? "Puter signed you straight back into the same account because you are still logged in at puter.com. To use a different one, log out at puter.com (Manage), then press Switch again." : "" };
+  paintAccount();
+}
+
+let acct = { user:null, err:"", loading:false, note:"" };
 async function refreshAccount(){
   acct.loading = true; paintAccount();
   let user = null, err = "";
   try{
     if(typeof puter==="undefined" || !puter.auth) throw new Error("Puter could not be reached. Check your connection.");
-    if(await puter.auth.isSignedIn()){
-      try{ user = await puter.auth.getUser(); }
-      catch(e){ hardResetAuth(); user = null; }   /* stale token: clear it so you can sign in again */
-    }
-  }catch(e){ err = errMsg(e); }
-  acct = { user, err, loading:false }; paintAccount();
+    if(await puter.auth.isSignedIn()) user = await puter.auth.getUser();
+  }catch(e){ err = (e && e.message) || "Puter could not be reached."; }
+  acct = { user, err, loading:false, note:"" }; paintAccount();
 }
 function paintAccount(){
   const box = $("#acctBox"); if(!box) return;
   const who = (title, sub) => `<div class="who"><div class="av2">${SVG("user")}</div><div><b>${esc(title)}</b><small>${esc(sub)}</small></div></div>`;
   if(acct.loading){ box.innerHTML = who("Checking account...","Talking to Puter"); return; }
+  const notes = (acct.note ? [acct.note] : []).concat(authHints()).map(t=>`<div class="acct-note">${esc(t)}</div>`).join("");
   if(acct.err){
-    box.innerHTML = who("Puter unavailable", acct.err) + `<div class="btns"><button type="button" class="btn" data-s="acct-refresh">${SVG("refresh")}Retry</button></div>`;
+    box.innerHTML = who("Puter unavailable", acct.err) + `<div class="btns"><button type="button" class="btn" data-s="acct-refresh">${SVG("refresh")}Retry</button></div>` + notes;
     return;
   }
   if(acct.user){
@@ -2007,10 +2340,10 @@ function paintAccount(){
     box.innerHTML = who(u, "Signed in with Puter") +
       `<div class="btns"><button type="button" class="btn" data-s="acct-switch">${SVG("refresh")}Switch</button>` +
       `<button type="button" class="btn" data-s="acct-manage">${SVG("external")}Manage</button>` +
-      `<button type="button" class="btn danger" data-s="acct-out">${SVG("logout")}Sign out</button></div>`;
+      `<button type="button" class="btn danger" data-s="acct-out">${SVG("logout")}Sign out</button></div>` + notes;
   } else {
     box.innerHTML = who("Not signed in","Sign in to use Klint with your Puter account") +
-      `<div class="btns"><button type="button" class="btn primary" data-s="acct-in">${SVG("login")}Sign in</button></div>`;
+      `<div class="btns"><button type="button" class="btn primary" data-s="acct-in">${SVG("login")}Sign in</button></div>` + notes;
   }
 }
 const seg = (key, opts, cur) => `<div class="seg" role="group">${opts.map(o=>`<button type="button" class="segb ${o[0]===cur?"on":""}" data-s="set" data-key="${key}" data-val="${o[0]}">${o[2]?SVG(o[2]):""}${o[1]}</button>`).join("")}</div>`;
@@ -2027,15 +2360,16 @@ function paintSettings(){
         <div class="srow"><div><b>Model</b><small>${esc(TIERS[tier].desc)}</small></div>${seg("tier",Object.entries(TIERS).map(([k,t])=>[k,t.name,t.icon]),tier)}</div>
         <div class="srow"><div><b>Effort</b><small>${esc(EFFORTS[effort].desc)}</small></div>${seg("effort",EFFORTS.map((e,i)=>[String(i),e.name]),String(effort))}</div>
         <div class="srow"><div><b>Smart suggestions</b><small>Follow-up chips and AI chat titles after replies</small></div>${seg("smart",[["on","On"],["off","Off"]],PREFS.get("smart","on"))}</div>
-        <div class="s-sec">Puter account</div>
-        <div class="acct-box" id="acctBox"></div>
+        <div class="s-sec">AI engine</div>
+        <div class="srow"><div><b>Provider</b><small>${provider()==="gemini" ? "Your own Gemini API key, billed by Google" : "Puter account (user pays), no key needed"}</small></div>${seg("provider",[["gemini","Gemini API"],["puter","Puter"]],provider())}</div>
+        ${provider()==="gemini" ? geminiPanel() : `<div class="s-sec">Puter account</div><div class="acct-box" id="acctBox"></div>`}
         <div class="s-sec">Data and shortcuts</div>
         <div class="srow"><div><b>Chats</b><small>${chats.length} saved on this device</small></div><button type="button" class="btn danger" data-s="clear">${SVG("trash")}Clear all</button></div>
         <div class="srow"><div><b>New chat</b><small>Start a fresh conversation</small></div><kbd><span>Ctrl</span><span>N</span></kbd></div>
       </div>
     </div>`;
   m.querySelector(".m-body").scrollTop = keep;
-  paintAccount();
+  paintAccount(); paintGemStat();
 }
 function openSettings(){
   closeMenus();
@@ -2043,6 +2377,8 @@ function openSettings(){
   if(!m){
     m = document.createElement("div"); m.id = "settings"; m.className = "modal";
     document.body.appendChild(m);
+    m.addEventListener("input", e=>{ if(e.target && e.target.id==="gemKey"){ PREFS.set("gem_key", e.target.value.trim()); scheduleGemCheck(); } });
+    m.addEventListener("change", e=>{ if(e.target && e.target.id==="gemModel"){ PREFS.set("gem_model", e.target.value); toast("Model: "+e.target.value); paintSettings(); scheduleGemCheck(); } });
     m.addEventListener("click", async e=>{
       if(e.target===m) return closeSettings();
       const b = e.target.closest("[data-s]"); if(!b) return;
@@ -2054,22 +2390,21 @@ function openSettings(){
         else if(k==="fs"){ PREFS.set("fs",v); applyFs(); }
         else if(k==="effort"){ setEffort(+v); return; }
         else if(k==="smart"){ PREFS.set("smart",v); }
+        else if(k==="provider"){ PREFS.set("provider",v); paintSettings(); paintGemStat(); if(v==="puter") refreshAccount(); return; }
         else if(k==="tier" && TIERS[v]){ tier = v; PREFS.set("tier",v); document.querySelectorAll(".composer-wrap").forEach(h=>h._paintModel && h._paintModel()); toast(TIERS[tier].name+" selected"); }
         paintSettings();
       }
+      else if(a==="gem-show"){ const k = $("#gemKey"); if(k){ const show = k.type==="password"; k.type = show ? "text" : "password"; b.textContent = show ? "Hide" : "Show"; } }
+      else if(a==="gem-test") geminiTest();
+      else if(a==="gem-load") gemLoadModels();
+      else if(a==="gem-custom"){ const v = ($("#gemCustom").value||"").trim().replace(/^models\//,""); if(v){ PREFS.set("gem_model", v); toast("Model set to "+v); paintSettings(); scheduleGemCheck(); } }
       else if(a==="clear"){ if(busy) return toast("Wait for the reply to finish"); if(chats.length && confirm("Delete all chats?")){ chats=[]; store.set(chats); cur=null; renderChat(); paintSettings(); toast("Chats cleared"); } }
       else if(a==="acct-refresh") refreshAccount();
       else if(a==="acct-manage") window.open("https://puter.com/","_blank","noopener");
-      else if(a==="acct-in" || a==="acct-switch" || a==="acct-out"){
-        try{
-          if(typeof puter==="undefined" || !puter.auth) throw new Error("Puter could not be reached.");
-          if(a==="acct-out"){ hardResetAuth(); toast("Signed out"); }
-          else{
-            if(a==="acct-switch") hardResetAuth();   /* no await before signIn so the popup is not blocked */
-            await puter.auth.signIn();
-            toast("Signed in");
-          }
-        }catch(err){ toast(errMsg(err)); }
+      else if(a==="acct-in"){ signInFlow().then(()=>refreshAccount()); }
+      else if(a==="acct-switch"){ switchAccount(); }
+      else if(a==="acct-out"){
+        try{ puter.auth.signOut(); toast("Signed out"); }catch(err){ toast(authError(err), 5000); }
         refreshAccount();
       }
     });
@@ -2080,6 +2415,7 @@ function closeSettings(){ const m = $("#settings"); if(m) m.classList.remove("op
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSettings(); });
 $("#settingsBtn").onclick = openSettings;
 applyTheme(); applyFs();
+paintGemStat(); if(provider()==="gemini" && gemKey()) checkGemKey();
 
 /* ============ INIT ============ */
 makeComposer($("#homeComposer"));
