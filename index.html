@@ -1974,13 +1974,24 @@ function applyFs(){ document.documentElement.dataset.fs = PREFS.get("fs","m"); }
 lightMQ.addEventListener?.("change", ()=>{ if(PREFS.get("theme","dark")==="system") applyTheme(); });
 
 let acct = { user:null, err:"", loading:false };
+function errMsg(e){
+  return (e && (e.message || e.msg || (typeof e.error==="string" && e.error) || e.error?.message || (typeof e==="string" && e))) || "Sign in failed or the popup was blocked";
+}
+function hardResetAuth(){
+  try{ puter.resetAuthToken && puter.resetAuthToken(); }catch{}
+  try{ puter.auth.signOut(); }catch{}   /* no await, keeps the next signIn tied to the click */
+  try{ Object.keys(localStorage).filter(k=>/^puter/i.test(k)).forEach(k=>localStorage.removeItem(k)); }catch{}
+}
 async function refreshAccount(){
   acct.loading = true; paintAccount();
   let user = null, err = "";
   try{
     if(typeof puter==="undefined" || !puter.auth) throw new Error("Puter could not be reached. Check your connection.");
-    if(await puter.auth.isSignedIn()) user = await puter.auth.getUser();
-  }catch(e){ err = (e && e.message) || "Puter could not be reached."; }
+    if(await puter.auth.isSignedIn()){
+      try{ user = await puter.auth.getUser(); }
+      catch(e){ hardResetAuth(); user = null; }   /* stale token: clear it so you can sign in again */
+    }
+  }catch(e){ err = errMsg(e); }
   acct = { user, err, loading:false }; paintAccount();
 }
 function paintAccount(){
@@ -2052,10 +2063,13 @@ function openSettings(){
       else if(a==="acct-in" || a==="acct-switch" || a==="acct-out"){
         try{
           if(typeof puter==="undefined" || !puter.auth) throw new Error("Puter could not be reached.");
-          if(a!=="acct-in") await puter.auth.signOut();
-          if(a!=="acct-out") await puter.auth.signIn();
-          toast(a==="acct-out" ? "Signed out" : "Signed in");
-        }catch(err){ toast((err && err.message) || "Sign in was cancelled"); }
+          if(a==="acct-out"){ hardResetAuth(); toast("Signed out"); }
+          else{
+            if(a==="acct-switch") hardResetAuth();   /* no await before signIn so the popup is not blocked */
+            await puter.auth.signIn();
+            toast("Signed in");
+          }
+        }catch(err){ toast(errMsg(err)); }
         refreshAccount();
       }
     });
