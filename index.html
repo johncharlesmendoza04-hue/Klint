@@ -497,6 +497,51 @@ kbd span{font:11px ui-monospace,monospace;background:#2a2a2a;color:var(--muted);
 .mchips button.on{transform:none}
 .fchip.img{padding-left:4px}.fchip img{width:28px;height:28px;border-radius:7px;object-fit:cover;flex:none}
 .uimgs{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;margin-bottom:6px}.uimgs img{max-width:220px;max-height:200px;border-radius:14px;object-fit:cover;box-shadow:0 0 0 .5px var(--line2)}
+
+/* ===== Task HUD ===== */
+.thud{position:fixed;top:14px;right:14px;width:310px;z-index:90;padding:12px 14px 10px;border-radius:18px;background:color-mix(in srgb,var(--panel) 88%,transparent);-webkit-backdrop-filter:blur(28px);backdrop-filter:blur(28px);box-shadow:0 0 0 .5px var(--line2),inset 0 .5px 0 rgba(255,255,255,.07),0 22px 54px -8px rgba(0,0,0,.55),0 6px 16px rgba(0,0,0,.25);font-family:"SF Pro Text",-apple-system,BlinkMacSystemFont,"Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-.011em;animation:hudin .5s cubic-bezier(.2,1.1,.3,1) both}
+.thud.out{animation:hudout .35s cubic-bezier(.5,0,.8,.4) both}
+@keyframes hudin{from{opacity:0;transform:translate(26px,-10px) scale(.94);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes hudout{to{opacity:0;transform:translate(26px,-8px) scale(.95);filter:blur(5px)}}
+.thud-h{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.thud-h b{font-size:13.5px;font-weight:620;letter-spacing:-.015em;flex:1;color:var(--text)}.thud-h em{font-style:normal;font-size:12px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.thud-h svg{width:14px;height:14px;color:var(--muted);transition:transform .3s cubic-bezier(.2,1,.3,1)}.thud.col .thud-h svg{transform:rotate(-90deg)}
+.thud-bar{height:6px;border-radius:6px;background:var(--line2);margin:10px 0 4px;overflow:hidden;position:relative}
+.thud-fill{height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,#7bd3a8,var(--accent),#a58bff);transition:width .6s cubic-bezier(.2,1,.3,1);position:relative;overflow:hidden}
+.thud-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:slide 1.4s infinite ease-in-out}
+.thud.fin .thud-fill::after{display:none}
+.thud-l{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:2px;max-height:260px;overflow:hidden;transition:max-height .4s cubic-bezier(.2,1,.3,1),opacity .25s,margin .3s}
+.thud.col .thud-l{max-height:0;opacity:0;margin:0}
+.g{display:flex;align-items:center;gap:10px;padding:6px 2px;font-size:13px;color:var(--muted);transition:color .25s}
+.g span{flex:1}.g small{font-size:11.5px;color:var(--muted);opacity:.85}
+.g.active{color:var(--text)}.g.done{color:var(--muted)}
+.ic{width:16px;height:16px;border-radius:50%;flex:none;position:relative;box-shadow:inset 0 0 0 1.5px var(--line2);transition:background .25s,box-shadow .25s}
+.ic svg{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:14;stroke-dashoffset:14;transition:stroke-dashoffset .35s .1s}
+.g.active .ic{box-shadow:inset 0 0 0 1.5px var(--line2)}.g.active .ic::after{content:"";position:absolute;inset:-1.5px;border-radius:50%;border:1.5px solid transparent;border-top-color:var(--accent);animation:spin .8s linear infinite}
+.g.done .ic{background:var(--ok,#30d158);box-shadow:none;animation:pop .4s cubic-bezier(.3,1.6,.5,1)}.g.done .ic svg{stroke-dashoffset:0}
+.g.fail .ic{background:#ff5f57;box-shadow:none}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+@media(max-width:760px){.thud{width:calc(100vw - 24px);top:56px;right:12px}}
+/* ===== Agent mode ===== */
+.agentbtn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:99px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12.5px;font-weight:590;box-shadow:inset 0 0 0 .5px var(--line2);transition:background .2s,color .2s,transform .2s cubic-bezier(.2,1,.3,1)}
+.agentbtn:hover{background:var(--card2);color:var(--text)}.agentbtn:active{transform:scale(.95)}
+html[data-agent="1"] .agentbtn{background:var(--text);color:var(--bg);box-shadow:none}
+html[data-agent="1"] .agentbtn span::after{content:" \00b7 " var(--agn)}
+.agpop{position:fixed;z-index:95;width:304px;padding:14px;border-radius:18px;background:color-mix(in srgb,var(--panel) 88%,transparent);-webkit-backdrop-filter:blur(28px);backdrop-filter:blur(28px);box-shadow:0 0 0 .5px var(--line2),inset 0 .5px 0 rgba(255,255,255,.07),0 24px 60px -8px rgba(0,0,0,.6);font-family:"SF Pro Text",-apple-system,BlinkMacSystemFont,"Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-.011em;transform-origin:0 100%;animation:macin .36s cubic-bezier(.2,1,.3,1) both}
+.agpop h4{margin:0;font-size:14.5px;font-weight:650;letter-spacing:-.02em;flex:1}.agpop p{margin:2px 0 0;font-size:12px;color:var(--muted);line-height:1.45}
+.agpop .row{display:flex;align-items:center;gap:10px}.agpop label{display:flex;justify-content:space-between;font-size:12.5px;font-weight:590;margin:16px 0 8px}.agpop label em{font-style:normal;color:var(--muted);font-weight:500}
+.agpop .msl{width:100%;margin:6px 0}
+.agroles{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.agroles i{font-style:normal;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--c)}
+.agseg{display:grid;grid-template-columns:repeat(3,1fr);padding:2px;border-radius:10px;background:var(--card);box-shadow:inset 0 0 0 .5px var(--line2);position:relative}
+.agseg i{position:absolute;top:2px;bottom:2px;left:2px;width:calc((100% - 4px)/3);border-radius:8px;background:var(--card2);box-shadow:0 0 0 .5px var(--line2),0 2px 6px rgba(0,0,0,.25);transition:transform .4s cubic-bezier(.3,1.4,.5,1)}
+.agseg button{position:relative;z-index:1;border:0;background:transparent;color:var(--text);font:inherit;font-size:12.5px;font-weight:590;padding:6px 0;border-radius:8px}
+.agfoot{margin-top:14px;font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between}
+.agt{margin:2px 0 12px;border-radius:14px;background:var(--card);box-shadow:inset 0 0 0 .5px var(--line2);overflow:hidden}
+.agt-h{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;color:var(--text);font:inherit;font-size:12.5px;font-weight:590;padding:9px 12px;text-align:left}
+.agt-h span{flex:1}.agt-h svg{width:14px;height:14px;color:var(--muted);transition:transform .3s cubic-bezier(.2,1,.3,1)}.agt:not(.open) .agt-h svg{transform:rotate(-90deg)}
+.agt-b{display:grid;gap:8px;padding:0 12px;max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.2,1,.3,1),padding .3s}.agt.open .agt-b{max-height:560px;overflow:auto;padding:2px 12px 12px}
+.agm{display:flex;gap:9px;animation:miin .45s cubic-bezier(.2,1,.3,1) both}.agm .av{width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 20%,transparent)}
+.agm b{font-size:12px;font-weight:650;color:var(--c)}.agm em{font-style:normal;font-size:11px;color:var(--muted);margin-left:6px}.agm div div{font-size:12.5px;line-height:1.5;color:var(--text);opacity:.88;margin-top:1px;white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -598,6 +643,7 @@ kbd span{font:11px ui-monospace,monospace;background:#2a2a2a;color:var(--muted);
     <div class="files"></div>
     <div class="c-row">
       <button class="icon-btn attach" type="button" title="Attach images or code files"><svg class="i"><use href="#plus"/></svg></button>
+      <button class="agentbtn" type="button" title="Agent mode"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.2 19c.4-3.3 2.8-5.2 5.8-5.2s5.4 1.9 5.8 5.2"/><path d="M16 5.6a3 3 0 0 1 0 5.8M18 14c1.7.7 2.7 2.4 3 5"/></svg><span>Agents</span></button>
       <input type="file" class="fileIn" multiple hidden accept="image/*,.txt,.md,.json,.csv,.js,.ts,.jsx,.tsx,.html,.css,.py,.java,.c,.cpp,.cs,.go,.rs,.php,.sql,.xml,.yaml,.yml,.log,.sh">
       <div class="grow"></div>
       <div class="mwrap"><button class="model" type="button"><svg class="i" style="width:15px;height:15px"><use href="#spark"/></svg><b>Klint 8</b><i class="eff-meter mini" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b></i><span class="tier">Beta</span><svg class="i" style="width:14px;height:14px"><use href="#chev"/></svg></button><div class="menu"></div></div>
@@ -897,6 +943,7 @@ function addMsg(m, i, arr){
   } else {
     el.innerHTML = `<div class="bot-av"><svg><use href="#mark"/></svg></div><div class="bot"><div class="md"></div><div class="msg-tools"></div></div>`;
     el.querySelector(".md").innerHTML = md(m.content);
+    if(m.agents){ el.querySelector(".bot").insertBefore(buildAgentTalk(m.agents.log), el.querySelector(".md")); }
     if(m.thought){ const t = buildThink(m.thought.secs, m.thought.plan, m.thought.lvl); if(t) el.querySelector(".bot").insertBefore(t, el.querySelector(".md")); }
     tools(el, m);
     if(arr && i===arr.length-1 && m.suggest) renderSuggest(el, m.suggest);
@@ -1081,18 +1128,29 @@ async function respond(c){
   const t0 = performance.now(); let thinkEl = null, thinkSecs = 0, lastPlan = "", failed = false;
   const cycle = setInterval(()=>{ if(planning) return; si = Math.min(si+1, STATUS.length-1); status.textContent = (full ? (STATUS[Math.max(2,si)]) : STATUS[si]) + "..."; }, 2600);
   stage.scrollTop = 1e9;
+  const usePlan = EFFORTS[effort].plan && !AG.on; let wIdx = usePlan ? 2 : 1, agentRes = null;
+  if(!AG.on){ Task.start("Working on your request", usePlan ? ["Read your request","Plan the approach","Write the answer","Final polish"] : ["Read your request","Write the answer","Final polish"]); Task.go(1); }
   const paint = () => { raf=0; mdEl.innerHTML = md(full, true); if(Live.follow) Live.stream(full); const near = stage.scrollHeight - stage.scrollTop - stage.clientHeight < 160; if(near) stage.scrollTop = stage.scrollHeight; };
   try{
     let sys = buildSystem();
-    if(EFFORTS[effort].plan){
+    if(usePlan){
       planning = true; status.textContent = (EFFORTS[effort].plan===2 ? "Thinking it through" : "Planning") + "...";
       let plan = ""; try{ plan = await makePlan(c.messages); }catch(_){}
       planning = false;
       if(abortFlag) throw new Error("Stopped.");
       if(plan){ sys = buildSystem(plan); lastPlan = plan; }
+      Task.go(wIdx);
+    }
+    if(AG.on){
+      planning = true; const talk = buildAgentTalk(); el.querySelector(".bot").insertBefore(talk, mdEl);
+      agentRes = await runAgents(c, talk, status);
+      planning = false; if(abortFlag) throw new Error("Stopped.");
+      sys = buildSystem() + agentRes.notes; wIdx = agentRes.final; Task.go(wIdx);
+      setTimeout(()=>talk.classList.remove("open"), 600);
     }
     await streamAI(c.messages, t=>{
       full += t; tokens++;
+      { const f = 1-Math.exp(-tokens/500); if(agentRes) Task.p((agentRes.total + Math.min(.95,f))/(agentRes.total+1)); else Task.wr(wIdx, Math.min(.92,f)); }
       if(tokens===1){
         si = 2; status.textContent = "Building...";
         thinkSecs = Math.round((performance.now()-t0)/1000);
@@ -1108,12 +1166,12 @@ async function respond(c){
     else full += "\n\n_Generation interrupted._";
     failed = true;
   }
-  clearInterval(cycle); cancelAnimationFrame(raf);
+  clearInterval(cycle); cancelAnimationFrame(raf); Task.finish(!failed && !!full);
   el.querySelector(".live")?.remove(); el.querySelector(".progress")?.remove();
   el.querySelector(".bot-av").classList.remove("busy");
   if(full){
     mdEl.innerHTML = md(full);
-    c.messages.push({role:"assistant", content:full, ...(thinkEl ? {thought:{secs:thinkSecs, plan:lastPlan, lvl:effort}} : {})}); store.set(chats);
+    c.messages.push({role:"assistant", content:full, ...(thinkEl ? {thought:{secs:thinkSecs, plan:lastPlan, lvl:effort}} : {}), ...(agentRes && agentRes.log.length ? {agents:{log:agentRes.log, n:agentRes.n}} : {})}); store.set(chats);
     tools(el, {});
   } else { tools(el, {}); }
   Live.end(full);
@@ -1686,6 +1744,90 @@ function shrinkImage(file, max=1280){
     im.src = u;
   });
 }
+
+/* ============ TASK HUD ============ */
+const Task = {
+  el:null, n:0, pct:0, t:0,
+  start(title, labels){
+    clearTimeout(this.t); this.el?.remove(); this.n = labels.length; this.pct = 0;
+    const e = this.el = document.createElement("div"); e.className = "thud";
+    e.innerHTML = `<div class="thud-h"><b>${esc(title)}</b><em>0%</em><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></div><div class="thud-bar"><div class="thud-fill"></div></div><ul class="thud-l">${labels.map(l=>`<li class="g"><i class="ic"><svg viewBox="0 0 16 16"><path d="M4 8.5l3 3 5.5-6"/></svg></i><span>${esc(l)}</span><small></small></li>`).join("")}</ul>`;
+    e.querySelector(".thud-h").onclick = ()=>e.classList.toggle("col");
+    document.body.appendChild(e);
+  },
+  set(i, st, sub){ const li = this.el?.querySelectorAll(".g")[i]; if(!li) return; li.className = "g "+st; li.querySelector("small").textContent = sub||""; },
+  p(v){ if(!this.el) return; this.pct = Math.max(this.pct, Math.min(1, v)); this.el.querySelector(".thud-fill").style.width = (this.pct*100)+"%"; this.el.querySelector("em").textContent = Math.round(this.pct*100)+"%"; },
+  go(i){ if(!this.el) return; this.el.querySelectorAll(".g").forEach((li,k)=>{ if(k<i && !li.classList.contains("done")) this.set(k,"done"); }); this.set(i,"active"); this.p(i/this.n); },
+  wr(w, f){ const span = (w===this.n-1) ? 1 : this.n-1-w; this.p((w + f*span)/this.n); },
+  finish(ok){
+    if(!this.el) return; const e = this.el; clearTimeout(this.t);
+    e.querySelectorAll(".g").forEach(li=>{ if(!li.classList.contains("done")) li.className = "g " + (ok?"done":(li.classList.contains("active")?"fail":"")); });
+    if(ok){ this.p(1); e.classList.add("fin"); e.querySelector("b").textContent = "All done"; }
+    else { e.classList.add("fin"); e.querySelector("b").textContent = "Stopped"; }
+    this.t = setTimeout(()=>{ e.classList.add("out"); setTimeout(()=>{ if(this.el===e){ e.remove(); this.el = null; } }, 380); }, ok?2200:3200);
+  }
+};
+
+/* ============ AGENT MODE ============ */
+const AG_ROLES = {1:["Builder"],2:["Planner","Builder"],3:["Planner","Builder","Critic"],4:["Researcher","Planner","Builder","Critic"],5:["Researcher","Planner","Builder","Critic","Polisher"]};
+const AG_COL = {Researcher:"#7bd3a8",Planner:"#4d8dff",Builder:"#ffb454",Critic:"#ff6a88",Polisher:"#a58bff"};
+const AG_DESC = {Researcher:"You gather facts, constraints, edge cases and references the team needs. Be specific.",Planner:"You break the request into a clear plan: goals, structure, key decisions and risks.",Builder:"You propose the concrete solution: structure, code approach, copy and design choices.",Critic:"You review teammates' ideas, point out flaws, missing requirements and risks, and suggest fixes.",Polisher:"You focus on quality: polish, accessibility, consistency, wording and small details."};
+const AG_TALK = [["Light",1,"One quick round of notes."],["Balanced",2,"Agents answer each other once."],["Deep",3,"A full debate before the final answer."]];
+const AG = (()=>{ let o = {}; try{ o = JSON.parse(localStorage.getItem("klint_agent")||"{}") }catch{} return { on:!!o.on, n:Math.min(5,Math.max(1,o.n||3)), talk:Math.min(2,Math.max(0,o.talk??1)) }; })();
+function syncAgent(){ const h = document.documentElement; h.dataset.agent = AG.on ? "1" : "0"; h.style.setProperty("--agn", '"'+AG.n+'"'); try{ localStorage.setItem("klint_agent", JSON.stringify(AG)); }catch{} }
+syncAgent();
+function agCalls(){ return AG.n>1 ? AG.n*AG_TALK[AG.talk][1]+1 : 1; }
+function openAgent(btn){
+  document.getElementById("agpop")?.remove();
+  const pop = document.createElement("div"); pop.id = "agpop"; pop.className = "agpop";
+  const draw = ()=>{
+    pop.innerHTML = `<div class="row"><div style="flex:1"><h4>Agent mode</h4><p>A small team works on your request and talks it through first.</p></div><button class="sw ${AG.on?"on":""}" data-t="on" aria-label="Agent mode"></button></div>
+    <label>Agents <em>${AG.n}</em></label><input type="range" class="msl" min="1" max="5" step="1" value="${AG.n}" style="--v:${(AG.n-1)*25}" data-t="n" aria-label="Number of agents">
+    <div class="agroles">${AG_ROLES[AG.n].map(r=>`<i style="--c:${AG_COL[r]}">${r}</i>`).join("")}</div>
+    <label>Collaboration <em>${AG_TALK[AG.talk][0]}</em></label><div class="agseg"><i style="transform:translateX(${AG.talk*100}%)"></i>${AG_TALK.map((t,i)=>`<button data-t="talk" data-i="${i}">${t[0]}</button>`).join("")}</div>
+    <p style="margin-top:8px">${AG_TALK[AG.talk][2]} ${AG.n===1?"One agent works alone.":"More rounds make better teamwork but take longer."}</p>
+    <div class="agfoot"><span>About ${agCalls()} model call${agCalls()>1?"s":""}</span><span>Saved for every chat</span></div>`;
+    pop.querySelector(".msl")?.addEventListener("input", e=>{ AG.n = +e.target.value; syncAgent(); const ox = pop.scrollTop; draw(); pop.querySelector(".msl").focus(); });
+  };
+  draw(); document.body.appendChild(pop);
+  const r = btn.getBoundingClientRect(); pop.style.left = Math.max(8, Math.min(r.left, innerWidth-312))+"px"; pop.style.bottom = (innerHeight - r.top + 10)+"px";
+  pop.addEventListener("click", e=>{ const t = e.target.closest("[data-t]"); if(!t) return; if(t.dataset.t==="on"){ AG.on = !AG.on; } else if(t.dataset.t==="talk"){ AG.talk = +t.dataset.i; } else return; syncAgent(); draw(); });
+  setTimeout(()=>{ const off = e=>{ if(pop.contains(e.target) || e.target.closest(".agentbtn")) return; pop.remove(); document.removeEventListener("pointerdown", off, true); }; document.addEventListener("pointerdown", off, true); }, 0);
+}
+document.addEventListener("click", e=>{ const b = e.target.closest(".agentbtn"); if(b){ e.preventDefault(); if(document.getElementById("agpop")) document.getElementById("agpop").remove(); else openAgent(b); } });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") document.getElementById("agpop")?.remove(); });
+function buildAgentTalk(log){
+  const d = document.createElement("div"); d.className = "agt" + (log ? "" : " open");
+  d.innerHTML = `<button type="button" class="agt-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;color:var(--muted);transform:none"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.2 19c.4-3.3 2.8-5.2 5.8-5.2s5.4 1.9 5.8 5.2"/><path d="M16 5.6a3 3 0 0 1 0 5.8M18 14c1.7.7 2.7 2.4 3 5"/></svg><span>Agent discussion</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="agt-b"></div>`;
+  d.querySelector(".agt-h").onclick = ()=>d.classList.toggle("open");
+  const body = d.querySelector(".agt-b"), head = d.querySelector(".agt-h span"); let n = 0;
+  d.add = (a, t, r)=>{ n++; const m = document.createElement("div"); m.className = "agm"; m.style.setProperty("--c", AG_COL[a]||"#999"); m.innerHTML = `<div class="av">${esc(a[0])}</div><div><b>${esc(a)}</b>${r>1?`<em>round ${r}</em>`:""}<div></div></div>`; m.querySelector("div div").textContent = t; body.appendChild(m); head.textContent = "Agent discussion \u00b7 "+n+" message"+(n>1?"s":""); body.scrollTop = body.scrollHeight; };
+  (log||[]).forEach(m=>d.add(m.a, m.t, m.r));
+  return d;
+}
+async function runAgents(c, talk, status){
+  const n = AG.n, roles = AG_ROLES[n], rounds = n>1 ? AG_TALK[AG.talk][1] : 0, total = n*rounds;
+  Task.start("Agent team \u00b7 "+n+(n>1?" agents":" agent"), [...roles, "Compose the answer"]);
+  const ask = (c.messages[c.messages.length-1].content||"").slice(0,4000); const log = []; let done = 0;
+  for(let r=1; r<=rounds; r++){
+    for(let i=0; i<n; i++){
+      if(abortFlag) return {log, n, total, notes:"", final:n};
+      const role = roles[i];
+      Task.set(i, "active", rounds>1 ? "Round "+r+" of "+rounds : "Working"); status.textContent = role+" is thinking...";
+      const hist = log.map(m=>m.a+": "+m.t).join("\n\n");
+      const sys = "You are the "+role+" on a small AI team helping the user. "+AG_DESC[role]+" Your teammates: "+roles.filter(x=>x!==role).join(", ")+". Talk directly to them by name. At most 110 words, no preamble, no headings. Do NOT write the final answer.";
+      const user = "User request:\n"+ask+"\n\nTeam discussion so far:\n"+(hist||"(nothing yet)")+"\n\n"+(r>1 ? "This is round "+r+" of "+rounds+". React to specific points teammates made: agree, push back or refine." : "Give your contribution.");
+      let t = ""; try{ t = await quickChat(sys, user, 60000); }catch(_){}
+      if(t){ log.push({a:role, t, r}); talk.add(role, t, r); }
+      done++; Task.set(i, r===rounds ? "done" : "pending", ""); Task.p(done/(total+1)*0.95);
+    }
+  }
+  Task.set(n, "active", "Writing");
+  const hist = log.map(m=>m.a+": "+m.t).join("\n\n");
+  const notes = log.length ? "\n\n# Team notes (a private discussion between your agents; use the best points, resolve disagreements, never mention the team or quote them)\n"+hist : "";
+  return {log, n, total, notes, final:n};
+}
+
 const LANDING_HINT = "\n# Default landing page layout (use this whenever the user asks for a landing page, home page or SaaS site and gives no layout instructions; if they give any instruction about layout, style or content, follow THEM instead)\nFULLSCREEN: the page fills the whole viewport edge to edge with no outer margins or frame, the hero is at least one full screen tall (min-height:100vh and 100svh), and the background and illustration run full-bleed. Inside that, components are soft and polished: pill-shaped buttons and tags, rounded cards (16 to 22px radius), gentle layered drop shadows, 0.5px to 1px light borders. Light, airy, premium SaaS look with this structure, adapting brand name, copy, colors and logos to the product:\n1. Top navbar spanning the full width (sticky, white or near-white with a hairline bottom border and a subtle blur): round logo mark plus brand or contact on the left, centered links (Product, APIs, Software, Developers), and on the right a filled pill primary button (for example 'Apply Now - It's Free!') with a soft shadow plus a plain 'Log in' link.\n2. Directly under it a slim, centered tab strip with a thin rounded border (Feature, Specification, Buy Now, Start Trial); the active tab has a short accent underline; tabs smooth-scroll to sections.\n3. Centered hero filling the screen: a small pale-tinted rounded announcement pill ('Exciting News: ...'); a two-line headline, very large (clamp 40px to 72px), near-black, tight tracking (-0.03em), semibold, with one key word set in italic serif for contrast (for example 'Modern'); a gray 16 to 18px subtitle, max-width about 640px; then two pill buttons: primary filled in a muted indigo or periwinkle with an arrow icon and a soft colored shadow, and a secondary white outline button.\n4. A 'Trusted by leaders in' micro-label with a row of 6 to 7 grayscale wordmark logos drawn as styled text or inline SVG (never external images).\n5. The hero ends in a full-bleed dreamy illustration drawn in inline SVG, anchored to the bottom of the screen and spanning edge to edge: layered misty mountains and a valley in periwinkle, violet, teal and soft green gradients, a gentle light haze or faint rainbow, optional waterfall and birds, fading softly into the white page at the top via a gradient mask.\n6. Below the hero keep the same airy style as full-width sections: 3-up feature cards (rounded, soft shadow), a specification section, pricing cards, a closing call to action and a minimal footer. Add scroll-reveal (fade, rise, slight blur), hover lifts, and smooth sticky navigation. Fully responsive, with the nav collapsing to a menu on mobile.";
 const GUI_HINT = "\n# Custom GUI controls (applies to any HTML interface you build)\nNever ship default browser controls. Every slider, toggle, button, select, checkbox, radio, stepper and tab bar must be custom-styled in a modern Apple (macOS and iOS) manner and must blend into the page's own theme.\n- Sliders (input type=range): appearance:none; 4px track with rounded ends; the filled part uses a --v percentage CSS variable updated in JS on input (and ::-moz-range-progress for Firefox); filled color comes from the theme (its accent or its text color), the unfilled part from the theme's border or a low-alpha tint of its text color. Thumb: 20 to 22px circle, white (or the theme's lightest surface), no visible border, layered soft shadows (0 0 0 .5px rgba(0,0,0,.14), 0 3px 8px rgba(0,0,0,.35)), grows to scale 1.15 on :active with a spring ease cubic-bezier(.3,1.6,.5,1). Add a focus-visible ring. Never leave the stock blue or grey native slider and never use a harsh pure-white track on a dark theme.\n- Buttons: pill or 10 to 12px radius, font-weight 590, subtle 0.5px inner border, press feedback scale(.95), hover brightness(1.1), focus-visible ring; one primary style (theme text color on theme background inverted, or the accent) and one quiet secondary style. Icons are inline SVG with stroke-linecap round, not emojis.\n- Toggles: iOS switch, 44 by 26px with a 22px thumb and spring transition. Segmented controls: inset rounded container with a sliding highlight. Selects, checkboxes and radios: fully custom (appearance:none).\n- Blend with the theme: derive every control color from the page's CSS variables (never invent unrelated colors), keep contrast accessible, set color-scheme to match, use the system font stack (SF Pro first), and animate with transitions of .15 to .35s using cubic-bezier(.2,1,.3,1).";
 const MOTIVE_HINT = "\n# Plugin: Motive (active), Apple-style motion graphics\nYou are now a senior motion designer in the vein of Apple's keynote and product-page animation teams. Whenever the user wants an animation, motion graphic, logo reveal, kinetic type, title sequence, loader, explainer loop or any animated visual, deliver it as described below.\n\n## Output contract\n- Return ONE complete, self-contained HTML file in a single ```html block. No external scripts, images, fonts or network requests. Include <meta name='viewport'> and a <title>.\n- Motion must use ONLY CSS @keyframes, SVG and the Web Animations API. No canvas, no setTimeout, no requestAnimationFrame-driven motion, so the Motive player can pause, scrub, change speed and restart it.\n- Build ONE master timeline: every animated element uses the same --D duration (default 6s, or the length the user asked for), animation-iteration-count:infinite, animation-fill-mode:both, and its own keyframe percentages to choreograph when it enters, holds and exits. Use animation-delay only for tiny per-letter or per-word staggers (under 0.6s total).\n- Make the loop seamless: elements start hidden, enter in the first 40 percent, hold, and fade or blur out during the last 8 to 10 percent so the end matches the start.\n- Scale to any aspect ratio: a full-viewport stage (width 100vw, height 100vh, overflow hidden, container-type:size) with sizes in cqw/cqh or clamp(). Keep text inside safe margins of 8 percent. Never hard-code pixel layouts.\n\n## Visual language (Apple)\n- Stage: pure black #000 by default (or very dark #0b0b0f); light variant #f5f5f7 with #1d1d1f text only if the user asks for light.\n- Font: font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',system-ui,sans-serif; headlines weight 600 to 700, letter-spacing -0.03em to -0.04em, line-height 1.05; supporting text weight 400 to 500 in rgba(255,255,255,.6). Add -webkit-font-smoothing:antialiased. Use big type (headline around 7 to 12cqw) and very few words.\n- Color: mostly monochrome. One accent family at a time (blue #0a84ff to #64d2ff by default, or one the user names). Highlight a single word or phrase with a gradient fill (background-clip:text) that shifts from white to the accent. Never use rainbow or neon clutter.\n- Depth and light: 2 or 3 large blurred radial-gradient glows (filter:blur(60px to 120px), opacity .5 to .9) drifting slowly in the corners or behind the text, plus an optional faint vignette. Subtle only.\n- Copy: short, confident, Apple-keynote sentences ('Fast. Good. Free.', 'Meet Aurora.'). One idea per scene. 2 to 5 scenes maximum. No emojis, no lorem ipsum, no filler.\n\n## Motion language\n- Signature reveal: from opacity 0, translateY(14px to 28px), filter:blur(10px to 16px) to sharp, over 0.7 to 1.1s equivalent. Stagger letters or words by 40 to 90ms (use a --i variable on spans).\n- Easing: never linear and never plain ease. Use cubic-bezier(.16,1,.3,1) for entrances, cubic-bezier(.65,0,.35,1) for transitions between scenes, and cubic-bezier(.34,1.56,.64,1) only for small playful pops. Exits are faster than entrances.\n- Scene transitions: cross-dissolve with slight scale (0.96 to 1) and blur, or slide a word out upward while the next rises in. Overlap scenes by 10 to 15 percent so nothing feels like a hard cut.\n- Add one slow ambient motion under everything (glow drift, a gentle scale 1 to 1.04, or a light sweep across text) so frames never feel static. Keep hold moments calm.\n- Use transform and opacity (plus filter) for performance. Add will-change:transform,opacity,filter on animated layers. Respect @media (prefers-reduced-motion) by slowing durations, not removing the content.\n\n## Craft checklist (verify before answering)\n1. Looks premium frozen at ANY frame, with nothing clipped, overlapping or off-center.\n2. Text is crisp, high contrast, and readable for at least 0.8s per phrase.\n3. Loop is seamless and total duration matches the request.\n4. Only transform, opacity and filter are animated; no layout jank.\n5. The code is clean: CSS variables for colors, timing and easing at the top of <style>.\nIf the user's request is vague, make confident design choices instead of asking questions. If they give a brand, product or tagline, use it exactly.\n\nAfter the code block, add one short line saying they can open it in Motive to preview, scrub and download.";
