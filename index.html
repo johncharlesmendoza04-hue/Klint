@@ -197,6 +197,18 @@ kbd span{font:11px ui-monospace,monospace;background:#2a2a2a;color:var(--muted);
 .lv-rs{position:absolute;right:0;bottom:0;width:22px;height:22px;cursor:nwse-resize;touch-action:none;display:grid;place-items:center;z-index:2}
 .lv-rs svg{width:13px;height:13px;stroke:#777;stroke-width:1.6;fill:none;stroke-linecap:round}
 .lv.full .lv-rs{display:none}
+.pd{display:block}
+.pd-r{background:rgba(255,85,85,.15)}
+.pd-a{background:rgba(70,194,138,.18)}
+.pd-h{opacity:.55}
+.lv-int{display:none;align-items:center;gap:8px;padding:8px 30px 8px 10px;background:#1c1c1c;border-top:1px solid #101010;flex:none}
+.lv.building .lv-int{display:flex}
+.lv-int input{flex:1;min-width:0;background:#111;border:1px solid #353535;color:#ececec;border-radius:9px;padding:7px 11px;font:inherit;font-size:13px;outline:0}
+.lv-int input:focus{border-color:#ffb454}
+.lv-int input::placeholder{color:#7a7a7a}
+.lv-int button{flex:none;display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:9px;background:#ffb454;color:#111;font-weight:600;font-size:12.5px;white-space:nowrap}
+.lv-int button:hover{filter:brightness(1.08)}
+.lv-int button svg.i{width:14px;height:14px}
 .lv-dock{position:fixed;right:18px;bottom:18px;z-index:81;display:none;align-items:center;gap:10px;padding:9px 14px;background:#222;border:1px solid var(--line2);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);color:#e6e6e6;font-weight:500;font-size:13px}
 .lv-dock.show{display:flex;animation:rise .25s ease both}
 .lv-dock:hover{background:#2b2b2b}
@@ -600,6 +612,9 @@ html[data-agent="1"] .agentbtn span::after{content:" \00b7 " var(--agn)}
     <button class="nav" data-mode="game"><svg class="i"><use href="#game"/></svg>Games</button>
     <button class="nav" data-mode="dash"><svg class="i"><use href="#chart"/></svg>Dashboards</button>
     <button class="nav" data-mode="research"><svg class="i"><use href="#research"/></svg>Research</button>
+    <button class="nav" data-mode="app"><svg class="i"><use href="#panel"/></svg>Apps</button>
+    <button class="nav" data-mode="ui"><svg class="i"><use href="#spark"/></svg>UI &amp; Motion</button>
+    <button class="nav" data-mode="code"><svg class="i"><use href="#code"/></svg>Code</button>
     <button class="nav" id="navMotive" style="display:none"><svg class="i"><use href="#spark"/></svg>Motive</button>
     <button class="nav" id="navPlugins"><svg class="i"><use href="#plus"/></svg>Plugins</button>
     <div class="sec">Chats</div>
@@ -688,7 +703,7 @@ When asked to build, design, make or replicate any page, app, component, tool, g
 4. Functionality must truly work: wire up all buttons, forms, tabs, modals, state, validation, persistence (localStorage where sensible, wrapped in try/catch), keyboard shortcuts for apps/games. Handle errors and empty data gracefully. Use clean, modular, commented-where-needed JavaScript with no globals leaking carelessly. The page runs inside a sandboxed preview frame, so never rely on window.open, alerts that block, or top-level navigation; use in-page modals and toasts.
 5. Games: smooth requestAnimationFrame loop, delta-time, collision correctness, score/high-score persistence, pause/restart, touch + keyboard controls, responsive canvas with devicePixelRatio scaling.
 6. When replicating a described or pictured interface, match layout, spacing, color, typography and behavior as faithfully as possible, but with original assets.
-7. When iterating on previous code, return the full updated file, not a diff, and preserve everything the user did not ask to change.
+7. When iterating on previous code, follow the "Editing protocol" section if it is present (small SEARCH/REPLACE patches, never a full rewrite). If it is absent, return the full updated file. Either way, preserve everything the user did not ask to change.
 
 # Writing code in other languages
 Write idiomatic, production-quality code with clear naming, input validation, error handling and brief comments. Mention how to run it. Prefer standard libraries. For debugging: identify the root cause first, then give the minimal correct fix and why it works.
@@ -720,10 +735,225 @@ const store = {
   get(){ try{ return JSON.parse(localStorage.getItem("klint_chats")||"[]") }catch{ return [] } },
   set(v){ try{ localStorage.setItem("klint_chats", JSON.stringify(v)) }catch{} }
 };
-let chats = store.get(), cur = null, busy = false, abortFlag = false, activeIcon = null;
+let chats = store.get(), cur = null, busy = false, abortFlag = false, interrupting = false, activeIcon = null;
 const SVG = n => `<svg class="i"><use href="#${n}"/></svg>`;
 const uid = () => Math.random().toString(36).slice(2,10);
 const toast = t => { const e=$("#toast"); e.textContent=t; e.classList.add("on"); clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove("on"),1600); };
+
+/* ============ PLAYBOOKS (one specialist prompt per mode) ============ */
+const PLAYBOOKS = {
+chat: `
+
+# Playbook: Chat (adaptive)
+Be a sharp, friendly generalist. Answer directly and keep it as short as the question allows. When the user asks you to build something, act as the matching specialist: a web designer for websites, a gameplay programmer for games, a product engineer for dashboards and tools, a design engineer for UI and animation work, a software engineer for non-browser code.`,
+
+web: `
+
+# Playbook: Websites (focus: art direction, layout and motion; working interactions second)
+You are now a senior web designer and front-end developer building a website that looks custom-made by a top studio. Priorities, in order: 1) visual identity and typography, 2) layout and responsiveness, 3) motion and interaction polish, 4) fully working behaviour.
+Concept first (one or two lines before the code): the audience, the tone, and one signature idea that makes the page memorable (an unusual hero treatment, a distinctive type pairing, a bold colour field, an animated diagram). No generic template look.
+Content: write real, specific, benefit-led copy and believable names, numbers and testimonials. No lorem ipsum, no "Feature One". Headlines are short and confident; every section has one clear job and one clear call to action.
+Structure: sticky navigation with a working mobile menu; hero; proof (logos or numbers); core sections matched to the brief; pricing or offer if relevant; FAQ accordion; final call to action; footer. Anchor links scroll smoothly and the active link highlights while scrolling (IntersectionObserver).
+Visual system: one accent plus a neutral scale, a display and a body typeface (system or Google font stack with fallbacks), fluid type with clamp(), a strict 8px spacing rhythm, consistent radii and shadows. Backgrounds with depth: gradients, subtle noise or grid via CSS or SVG, inline SVG illustrations. No external images.
+Motion: staggered hero entrance, scroll-reveal (opacity and translate only, 12 to 24px, 500 to 800ms, ease-out), hover lifts, animated counters, a marquee or ticker where it fits, subtle parallax with transform only. Honour prefers-reduced-motion. Never animate layout properties.
+Behaviour that must work: mobile menu, tabs or accordions, pricing toggle (monthly and yearly recalculate), contact or signup form with validation plus inline error and success states, modal if used, copy-to-clipboard where relevant.
+Also: semantic landmarks, one h1, descriptive title and meta description, visible focus states, contrast at least AA, tap targets at least 44px.`,
+
+game: `
+
+# Playbook: Games (focus: gameplay feel and correctness first, then visuals and juice)
+You are now a senior gameplay programmer. Priorities, in order: 1) the game plays correctly and feels great, 2) robust controls on keyboard, mouse and touch, 3) readable visuals, 4) polish and juice. The interface around the game stays minimal; the canvas is the star.
+Before the code, state the loop in one or two lines: goal, how you lose, how difficulty ramps, what the player does second to second.
+Architecture: one state object; a state machine (menu, playing, paused, gameover); update(dt) and render() kept separate; requestAnimationFrame with a clamped delta (max 50ms) or a fixed 60Hz timestep with an accumulator for physics; entity arrays with spawn and cleanup; a seeded RNG helper. Canvas scaled by devicePixelRatio and resized on window resize while keeping the logical resolution; image-rendering: pixelated for pixel art.
+Input: one input layer mapping keys (arrows, WASD, space, P or Esc to pause, R to restart), pointer and touch (on-screen buttons or swipe and drag) to actions; preventDefault on game keys so the page never scrolls; focus the canvas on start; release all keys on blur; auto-pause on visibilitychange.
+Correctness: collisions that cannot tunnel (swept checks or sub-stepping for fast objects), no NaN or negative-time bugs, no stuck states, fair spawns (never unavoidable damage, never spawn on the player), score and best score saved with localStorage in try/catch, a clean restart that resets every system and timer.
+Feel: acceleration and friction rather than instant velocity where it suits, coyote time and input buffering for platformers, easing on UI, screen shake, hit flash, particles with a hard cap, floating score text. Optional tiny WebAudio sound effects started only after the first user gesture, with a visible mute toggle.
+Visuals: one cohesive palette and style drawn procedurally (no external assets), a clear HUD (score, lives, level), crisp text, a start screen that explains the controls, a game over screen with score, best and a restart button.
+Before finishing, mentally play the first ten seconds, one death and one restart, and fix anything that breaks.`,
+
+dash: `
+
+# Playbook: Dashboards (focus: data correctness and working interactions first, then clean visual design)
+You are now a senior product engineer building an analytics interface people use all day. Priorities, in order: 1) coherent data and correct calculations, 2) interactions that update everything consistently, 3) clear information hierarchy, 4) restrained visual polish.
+Data: generate realistic, internally consistent sample data with a small seeded generator (trend plus seasonality plus noise, plausible categories, names and units). Keep data, state (filters, sort, page, selection), derive() for computed numbers and render() for the DOM separate. Totals, percentages and deltas must reconcile across KPI cards, charts and tables.
+Interactions: global filters (date range presets, category, search) that update every widget; a sortable, paginated table with search; hover tooltips and legends that toggle series; a row click that opens a detail drawer; drag and drop only when the brief needs it. Provide loading skeletons, empty states and error states.
+Charts: Chart.js from cdnjs with a pinned version, or hand-drawn SVG, themed from CSS variables, responsive, with accessible labels and sensible formatting (Intl.NumberFormat, compact notation, currency, dates). Choose the right chart for the question (line for trend, bar for comparison, stacked for composition, sparklines in cards); never 3D, never more than 6 series.
+Layout: collapsible sidebar or top bar, a card grid on an 8px system, a KPI row on top with delta badges and sparklines, then the main chart, then secondary charts and tables. Dense but legible: tabular numerals, right-aligned numbers, muted labels, one accent colour plus semantic green and red used only for meaning.
+Persist filters and theme in localStorage (try/catch). Include a light and dark theme toggle. For export, show the data in an in-page modal with a copy button because downloads may be blocked in the preview frame.`,
+
+app: `
+
+# Playbook: Apps and tools (focus: functionality, correctness and robustness first; calm, clean UI)
+You are now a senior application engineer. Priorities, in order: 1) the core workflow works end to end with no dead controls, 2) data integrity and edge cases, 3) speed and keyboard flow, 4) a polished interface.
+Before the code, state the core user flow and the data model in one or two lines. Then build it complete: create, read, update, delete, search, filter, sort, bulk actions where they make sense, undo and redo for editing and destructive actions, confirmation only where data loss is possible.
+Architecture: one state object, pure update functions, one render function, event delegation, a versioned schema saved to localStorage with try/catch and a safe fallback, and autosave with a subtle saved indicator. Offer import and export through an in-page modal with a textarea (downloads and file pickers may be restricted in the preview frame).
+Correctness: validate and normalise all input; handle empty, huge, duplicate, unicode and rapid-repeat cases; avoid floating-point errors in money and unit maths (round deliberately, keep cents as integers); handle dates and timezones explicitly; debounce expensive work; never lose user data on error.
+Interaction: keyboard shortcuts with a help overlay (press ?), focus management in modals and menus, Escape closes layers, Enter submits, aria-live toasts for feedback, sensible defaults and sample data so the first screen is never empty.
+Visual: quiet, modern and consistent: one accent, neutral surfaces, clear hierarchy, uniform component sizes, short smooth transitions. The beauty comes from alignment and spacing, not decoration.`,
+
+ui: `
+
+# Playbook: UI and motion (focus: interface craft, GUI and animation; every control still works)
+You are now a design engineer in the vein of Apple, Linear and Stripe: someone who obsesses over how an interface feels. Priorities, in order: 1) interaction design and motion quality, 2) visual precision and consistency, 3) realistic, working prototype behaviour, 4) performance.
+Deliver an interactive prototype, not a picture: mobile app flows inside a device frame (status bar, island or notch, home indicator, safe areas) with a working tab bar, navigation transitions and sheets, or a component showcase that shows every state (default, hover, focus, active, disabled, loading, error, success).
+Motion system: define tokens (--ease-out, --ease-spring, --dur-fast 150ms, --dur 300ms, --dur-slow 500ms). Entrances ease-out, exits ease-in and faster, direct manipulation uses springs (cubic-bezier(.3,1.6,.5,1) or a small damped-spring solver in JS). Animate transform and opacity only, keep animations interruptible, stagger lists by 30 to 60ms, use the FLIP technique for layout changes, animate numbers with tickers, add skeleton shimmer and press feedback.
+Gestures: pointer events for drag, swipe and bottom-sheet pull with velocity-based snapping, rubber-banding at the edges, pull to refresh, swipe to delete, long-press menus where relevant. Touch and mouse must both work.
+Visual precision: 4px grid, a modular type scale, layered soft shadows, hairline borders, glass or blur sparingly and always with a solid fallback, one inline SVG icon sprite with one stroke weight, true dark mode through CSS variables. Check alignment, optical centering and contrast.
+Respect prefers-reduced-motion by swapping movement for fades. Never let an animation block input. Keep 60fps: no layout thrash, no animating large box-shadows, will-change used sparingly.`,
+
+code: `
+
+# Playbook: Code (programming that is not a web page; focus: correctness, clarity and verification)
+You are now a senior software engineer. Use the language the user names; if none, choose the most natural one and say so in a few words. Priorities, in order: 1) correct and complete, 2) idiomatic and readable, 3) safe and robust, 4) efficient where it matters.
+Deliver runnable code with an entry point, imports, input validation, meaningful errors and brief comments only where intent is not obvious. When there are several files, put the file name in a first-line comment and use one fenced block per file. Add a few tests or example calls with expected output, and one line on how to run it. Mention time and space complexity only for algorithms.
+Debugging: restate the symptom, find the root cause, give the minimal fix, explain why it works, and say how to verify it. Do not rewrite unrelated code.
+Security and quality: parameterised queries, no secrets in code, escape output, no unsafe eval, handle resources and cancellation properly, prefer the standard library.
+Editing earlier code: when the user asks for a change to code you already wrote, show only the changed or new functions, classes or regions in full and say exactly where they go. Do not repeat unchanged code unless the file is short (under about 80 lines) or they ask for the whole file.
+If the user actually wants something that runs in a browser, switch to a single complete HTML file.`,
+
+research: `
+
+# Playbook: Research (focus: depth, structure and honesty; no code unless asked)
+You are now a rigorous analyst. Open with the direct answer or bottom line in two or three sentences, then build the case. Use short headings, tight paragraphs, a comparison table when options are weighed, concrete examples and numbers, and a brief summary with next steps at the end.
+Separate what is established, what is contested and what is your inference. State assumptions and what would change the conclusion. Present the strongest counterargument fairly. You cannot browse, so never invent sources, quotes, statistics or URLs; say when a figure is approximate or may be out of date.
+Calibrate depth to the question: a simple question gets a short answer, a broad one gets a structured report. Offer a simpler or deeper version in one line when useful.`
+};
+
+/* Which extra style blocks each playbook gets */
+const extrasFor = k => ((k==="chat"||k==="web"||k==="app"||k==="dash"||k==="ui") ? GUI_HINT : "") + ((k==="chat"||k==="web") ? LANDING_HINT : "");
+
+/* Auto-routing: in Chat mode a build request picks the matching playbook for that turn */
+const ROUTE_VERB = /\b(build|make|create|design|code|write|generate|develop|clone|replicate|recreate|mock ?up|prototype|animate|implement|give me|i need|i want)\b/i;
+const ROUTE_LANG = /\b(python|java|rust|golang|c\+\+|c#|sql|bash|ruby|php|kotlin|swift|typescript|regex|algorithm|script|api endpoint)\b/i;
+const ROUTE_CAT = [
+  ["game", /\b(game|snake|tetris|platformer|arcade|pong|2048|flappy|shooter|breakout|chess|sudoku|minesweeper|wordle)\b/i],
+  ["dash", /\b(dashboard|analytics|kpi|admin panel|kanban|data viz)\b/i],
+  ["web",  /\b(landing page|web ?site|home ?page|portfolio|web page|online store|storefront|blog)\b/i],
+  ["ui",   /\b(mobile app|app ui|app screen|ui kit|mock ?up|animation|animated|micro-?interaction|loader|onboarding|navbar|modal|component|bottom sheet|button)\b/i],
+  ["app",  /\b(calculator|converter|to-?do|planner|timer|stopwatch|notes? app|generator|tracker|editor|quiz|flashcards?|app|tool)\b/i]
+];
+function autoPlaybook(t){
+  if(!t || !ROUTE_VERB.test(t)) return null;
+  if(ROUTE_LANG.test(t) && !/\b(html|web|browser|canvas|css|website|page)\b/i.test(t)) return "code";
+  for(const [k,re] of ROUTE_CAT) if(re.test(t)) return k;
+  return null;
+}
+let ROUTED = null, EDIT = null;
+const pbOf = () => ROUTED || mode;
+
+/* ============ EDIT ENGINE (patch instead of rewrite) ============ */
+const REMAKE_RE = /\b(re-?make|re-?build|redo|start (over|again|fresh)|from scratch|re-?write (it|this|everything|the (whole|entire))|(completely|totally|entirely|fully) (new|different|redo|redesign|rewrite|rebuild|remake)|scrap (it|this)|brand new (version|design)|(new|different) (design|version) (from scratch|entirely))\b/i;
+const EDIT_HINT = `
+
+# Editing protocol (a file is already open in the live preview)
+The user is iterating on the CURRENT FILE given at the end of this message. Do NOT rewrite it. Reply with one short line saying what you are changing, then ONE patch block, then at most one short line of notes. The patch block uses exactly this format:
+
+\`\`\`patch
+<<<<<<< SEARCH
+exact lines copied from the current file
+=======
+the new lines
+>>>>>>> REPLACE
+\`\`\`
+
+Rules:
+- SEARCH must be copied character for character from the current file (same indentation, quotes and spacing) and must be unique in it. Add a few neighbouring lines of context when the snippet is short or repeated. Keep each SEARCH small (usually 1 to 12 lines) and never abbreviate it with "..." or comments.
+- To insert code, SEARCH an anchor line and REPLACE it with the anchor plus the new code. To delete code, leave REPLACE empty.
+- Use several blocks for several changes, in file order. Blocks never overlap. Every block needs all three markers.
+- Keep HTML, CSS and JS consistent: if you add an element, also add its styles and its JS wiring; if you rename an id or class, update every reference.
+- Preserve everything the user did not ask to change. Do not reformat, restyle or improve unrelated code.
+- If the change would touch more than about half of the file, output a complete new file in a single html block instead of a patch.
+- If the user is NOT asking to change this file (a question, or a different project), ignore this protocol: answer normally, and give a complete new file for a new project.
+- Never output a patch together with a full file, and never paste the whole current file back.
+- Quality checks still apply: after your edit, every id, function and selector you reference must exist.`;
+const REMAKE_HINT = `
+
+# Rebuild requested
+The user asked to remake or redo this completely. Ignore any patching: write a brand new, complete file in a single html block, built fresh to the playbook above. Reuse content or ideas from the earlier version only if the user asked for that.`;
+const RESUME_HINT = `
+
+# Resume
+Your previous file was cut off before it finished, so it cannot be patched. Write the COMPLETE file in a single html block, merging the user's latest request with the partial code visible in the conversation. Keep what it had already established unless the new request replaces it.`;
+const FALLBACK_HINT = `
+
+# Full rewrite required
+Your edit patch could not be applied automatically. Do not use patches now. Output the COMPLETE updated file in a single html block, applying every change the user asked for to the CURRENT FILE below and preserving everything else exactly.`;
+function editBlock(){
+  if(!EDIT) return "";
+  if(EDIT.mode==="edit") return EDIT_HINT + "\n\n# CURRENT FILE (latest version; SEARCH text must match it exactly)\n```html\n" + EDIT.base + "\n```";
+  if(EDIT.mode==="fallback") return FALLBACK_HINT + "\n\n# CURRENT FILE\n```html\n" + EDIT.base + "\n```";
+  if(EDIT.mode==="remake") return REMAKE_HINT;
+  if(EDIT.mode==="resume") return RESUME_HINT;
+  return "";
+}
+const Patch = (()=>{
+  const RE = /<{5,9}[ \t]*SEARCH[ \t]*\r?\n([\s\S]*?)\r?\n={5,9}[ \t]*\r?\n([\s\S]*?)(?:\r?\n)?>{5,9}[ \t]*REPLACE/g;
+  const has = t => /<{5,9}[ \t]*SEARCH/.test(t||"");
+  function blocks(text){ const out = []; let m; RE.lastIndex = 0; while((m = RE.exec(text||""))) out.push({search:m[1], replace:m[2]}); return out; }
+  const norm = l => l.replace(/^\s+|\s+$/g,"");
+  const edge = t => t.replace(/^\n+|\n+$/g,"");
+  function applyOne(doc, search, replace){
+    search = search.replace(/\r/g,""); replace = replace.replace(/\r/g,"");
+    let i = doc.indexOf(search);
+    if(i >= 0) return doc.slice(0,i) + replace + doc.slice(i + search.length);
+    const st = edge(search), rt = edge(replace);
+    if(!st.trim()) return null;
+    i = doc.indexOf(st);
+    if(i >= 0) return doc.slice(0,i) + rt + doc.slice(i + st.length);
+    /* line by line, tolerant of indentation and trailing spaces */
+    const dl = doc.split("\n"), sraw = st.split("\n"), sl = sraw.map(norm), rl = rt.split("\n");
+    outer: for(let a = 0; a + sl.length <= dl.length; a++){
+      for(let b = 0; b < sl.length; b++) if(norm(dl[a+b]) !== sl[b]) continue outer;
+      const baseInd = (dl[a].match(/^\s*/)||[""])[0], srcInd = (sraw[0].match(/^\s*/)||[""])[0];
+      const out = (baseInd === srcInd) ? rl : rl.map(l => (srcInd && l.startsWith(srcInd)) ? baseInd + l.slice(srcInd.length) : (!srcInd && l.trim() ? baseInd + l : l));
+      return dl.slice(0,a).concat(out, dl.slice(a + sl.length)).join("\n");
+    }
+    return null;
+  }
+  function resolve(base, text){
+    const bl = blocks(text); let doc = base, ok = 0; const failed = [];
+    for(const b of bl){
+      const r = applyOne(doc, b.search, b.replace);
+      if(r == null) failed.push(edge(b.search).split("\n")[0].trim().slice(0,80)); else { doc = r; ok++; }
+    }
+    return { html:doc, ok, failed, total:bl.length };
+  }
+  return { has, blocks, resolve };
+})();
+function patchHtml(code){
+  let st = 0;
+  return code.split("\n").map(l=>{
+    const e = esc(l) || " ";
+    if(/^<{5,9}[ \t]*SEARCH/.test(l)){ st = 1; return '<span class="pd pd-h">'+e+'</span>'; }
+    if(st===1 && /^={5,9}[ \t]*$/.test(l)){ st = 2; return '<span class="pd pd-h">'+e+'</span>'; }
+    if(/^>{5,9}[ \t]*REPLACE/.test(l)){ st = 0; return '<span class="pd pd-h">'+e+'</span>'; }
+    return '<span class="pd'+(st===1?' pd-r':st===2?' pd-a':'')+'">'+e+'</span>';
+  }).join("");
+}
+/* the file the model should edit = the newest complete file in the chat (patches already applied) */
+function lastFullCode(m){
+  const re = /```(html|svg)[^\n]*\n([\s\S]*?)```/gi; let x, last = null;
+  while((x = re.exec(m.content||""))) if(!Patch.has(x[2])) last = x[2].replace(/\n$/,"");
+  return last;
+}
+function currentCode(c){
+  for(let i = c.messages.length-1; i >= 0; i--){
+    const m = c.messages[i]; if(m.role !== "assistant") continue;
+    if(m.applied && m.applied.html) return m.applied.html;
+    if(m.partial) return null;
+    const x = lastFullCode(m); if(x) return x;
+  }
+  return null;
+}
+/* history sent to the model while editing: old full files are replaced by a note, the current file travels in the system message */
+function apiHistory(msgs){
+  return msgs.map(m=>{
+    if(m.role !== "assistant") return m;
+    const t = (m.content||"").replace(/```(html|svg)[^\n]*\n([\s\S]*?)(```|$)/gi, (all,l,code)=> Patch.has(code) ? all : "[An earlier full version of the file was here. It is omitted from the history; the current file is in the system message.]");
+    return {...m, content:t};
+  });
+}
+let mdResolved = null;
 
 /* ============ MODES & TIERS ============ */
 const TIERS = {
@@ -769,12 +999,34 @@ const MODES = {
     ["chart","Market overview","Give a structured overview of how to evaluate a startup market, with a framework and example"],
     ["file","Study guide","Create a concise study guide on the basics of how the internet works"],
     ["brain","Explain simply","Explain quantum computing simply, then more deeply, with analogies"],
-    ["research","Pros and cons","Give a balanced analysis of remote work versus office work for software teams"]]}
+    ["research","Pros and cons","Give a balanced analysis of remote work versus office work for software teams"]]},
+  app:{ title:'Build a <em>tool</em> or app', ph:"Describe the app or tool you need...", icon:"panel", hint:"", chips:[
+    ["panel","Task manager","Build a task manager with projects, due dates, priorities, search, undo and keyboard shortcuts"],
+    ["panel","Budget planner","Build a budget planner with categories, monthly totals, a savings goal and a breakdown chart"],
+    ["panel","Markdown notes","Build a markdown notes app with live preview, tags, search and autosave"],
+    ["panel","Focus timer","Build a pomodoro focus timer with sessions, breaks, stats and a clean minimal interface"],
+    ["panel","Unit converter","Build a unit converter with length, weight, temperature and currency tabs and instant results"],
+    ["panel","Flashcards","Build a flashcard study app with decks, spaced repetition and progress tracking"]]},
+  ui:{ title:'Craft a <em>UI</em> with motion', ph:"Describe the interface or animation...", icon:"spark", hint:"", chips:[
+    ["phone","Mobile app flow","Create a mobile app prototype for a meditation app with onboarding, home, a player screen, a tab bar and smooth transitions"],
+    ["spark","Animated components","Build a showcase of animated UI components: toggles, segmented control, buttons, cards, a modal and toasts, with every state"],
+    ["phone","Bottom sheet","Build a draggable bottom sheet with snap points, rubber-banding and a map-style background"],
+    ["spark","Loading animations","Create a set of elegant loading animations and skeleton screens with smooth easing"],
+    ["layout","Command palette","Build a command palette with fuzzy search, keyboard navigation and animated results"],
+    ["phone","Music player UI","Design a music player UI with an animated waveform, album art transitions and gesture controls"]]},
+  code:{ title:'Write <em>code</em>', ph:"Describe the code you need or paste a bug...", icon:"code", hint:"", chips:[
+    ["code","Python script","Write a Python script that organises files by type and date, with a dry-run option and tests"],
+    ["code","Debug my code","Help me debug my code: I will paste it together with the error message"],
+    ["code","SQL queries","Write SQL for a ranking, a running total and a month-over-month growth query, with a sample schema and data"],
+    ["code","Algorithm","Implement an LRU cache and explain its time complexity, with tests"],
+    ["code","REST API","Write a small REST API with validation, error handling and tests"],
+    ["code","Regex","Write and explain a regex that validates and extracts parts of email addresses and URLs, with test cases"]]}
 };
+Object.keys(PLAYBOOKS).forEach(k=>{ if(MODES[k]) MODES[k].hint = PLAYBOOKS[k]; });
 let mode = "chat";
 let tier = (()=>{ try{ return localStorage.getItem("klint_tier") }catch{ return null } })();
 if(!TIERS[tier]) tier = "pro";
-const buildSystem = plan => KLINT_SYSTEM + (MODES[mode].hint||"") + TIERS[tier].hint + (plOn("motive")?MOTIVE_HINT:"") + GUI_HINT + LANDING_HINT
+const buildSystem = plan => KLINT_SYSTEM + (MODES[pbOf()].hint||"") + TIERS[tier].hint + (plOn("motive")?MOTIVE_HINT:"") + extrasFor(pbOf()) + editBlock()
   + "\n\n# Effort level: " + EFFORTS[effort].name + "\n" + EFFORTS[effort].hint
   + (plan ? "\n\n# Private plan from your planning stage (never mention or reveal it; follow it and fix anything it flags)\n" + plan.slice(0,3500) : "");
 function renderHome(){
@@ -801,12 +1053,14 @@ function makeComposer(host){
   const n = $("#composerT").content.cloneNode(true);
   host.appendChild(n);
   const ta = host.querySelector("textarea"), send = host.querySelector(".send");
-  const fit = () => { ta.style.height="auto"; ta.style.height=Math.min(ta.scrollHeight,220)+"px"; send.classList.toggle("ready", !!ta.value.trim() || busy || !!(host._files && host._files.length)); };
+  const fit = () => { ta.style.height="auto"; ta.style.height=Math.min(ta.scrollHeight,220)+"px"; send.classList.toggle("ready", !!ta.value.trim() || busy || !!(host._files && host._files.length)); if(busy) setSendState(); };
   ta.addEventListener("input", fit);
   ta.addEventListener("keydown", e => { if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); go(); } });
   const go = () => {
-    if(busy){ abortFlag = true; return; }
-    const v = ta.value.trim(); if(!v && !host._files.length) return;
+    const v = ta.value.trim();
+    /* nothing typed while building = plain Stop; something typed = interrupt the build and apply it */
+    if(busy && !v && !host._files.length){ abortFlag = true; return; }
+    if(!v && !host._files.length) return;
     host._hideHint && host._hideHint();
     const files = host._files; host._files = []; renderFiles();
     ta.value=""; fit();
@@ -816,7 +1070,7 @@ function makeComposer(host){
       full += docs.map(f=>"\n\n[Attached file: "+f.name+"]\n```\n"+f.text+"\n```").join("");
       shown += (shown?"\n":"") + "Attached: " + docs.map(f=>f.name).join(", ");
     }
-    submit(full, shown, imgs);
+    (busy ? interruptSend : submit)(full, shown, imgs);
   };
   send.addEventListener("click", go);
   host._ta = ta; host._send = send; host._fit = fit;
@@ -869,10 +1123,40 @@ function makeComposer(host){
 }
 function setSendState(){
   document.querySelectorAll(".send").forEach(b=>{
-    b.innerHTML = busy ? SVG("square") : SVG("up");
-    b.classList.toggle("stop", busy);
-    b.classList.toggle("ready", busy);
+    const comp = b.closest(".composer"), ta = comp && comp.querySelector("textarea"), host = comp && comp.parentElement;
+    const typed = !!(ta && (ta.value.trim() || (host && host._files && host._files.length)));
+    const intr = busy && typed;               /* typing while building = interrupt & send */
+    b.innerHTML = (busy && !intr) ? SVG("square") : SVG("up");
+    b.classList.toggle("stop", busy && !intr);
+    b.classList.toggle("ready", busy || typed);
+    b.title = intr ? "Interrupt the build and send" : (busy ? "Stop" : "Send");
+    if(ta) ta.placeholder = busy ? "Interrupt the build: tell Klint what to change..." : ((typeof MODES!=="undefined" && MODES[mode]) ? MODES[mode].ph : "Ask anything, or describe what to build...");
   });
+}
+
+/* Cut the current build off where it is, keep the partial code in the chat, and send the change as the next request. */
+async function interruptSend(full, shown, imgs){
+  if(!busy) return submit(full, shown, imgs);
+  interrupting = true; abortFlag = true;
+  toast("Interrupted - applying your change");
+  const t0 = Date.now();
+  while(busy && Date.now()-t0 < 10000) await new Promise(r=>setTimeout(r,50));
+  interrupting = false;
+  if(busy){ toast("Still stopping - try again in a moment"); return; }
+  const c = chats.find(x=>x.id===cur);
+  const last = c && c.messages[c.messages.length-1];
+  if(last && last.role==="assistant"){
+    full = "[I interrupted your previous reply midway, so it is incomplete. Apply this change on top of what was already built.]\n\n" + full;
+  } else if(last && last.role==="user"){
+    /* stopped before any output: fold both requests into one so roles still alternate */
+    c.messages.pop();
+    full = last.content + "\n\nChange of plan, also apply this: " + full;
+    shown = (last.shown||last.content) + "\n" + shown;
+    if(last.images && last.images.length) imgs = [...last.images, ...(imgs||[])];
+  }
+  const p = submit(full, shown, imgs);
+  Live.resume();                              /* keep the open live preview following the new build */
+  return p;
 }
 
 /* ============ MARKDOWN ============ */
@@ -919,17 +1203,19 @@ function md(src, streaming){
 }
 let codeStore = {};
 function codeBlock(c, streaming){
-  const id = uid(); codeStore[id]=c.code;
-  const html = /^(html|svg)$/i.test(c.lang);
+  const id = uid();
+  const isPatch = /^<{5,9}[ \t]*SEARCH/m.test(c.code);
+  codeStore[id] = (isPatch && mdResolved) ? mdResolved : c.code;
+  const html = isPatch ? !!mdResolved : /^(html|svg)$/i.test(c.lang);
   const ready = c.done && !streaming;
   return `<div class="code" data-id="${id}">
-    <div class="code-h"><span class="lang">${esc(c.lang)}</span>
+    <div class="code-h"><span class="lang">${isPatch ? "edits" : esc(c.lang)}</span>
       ${html ? `<button class="cbtn view" data-act="view">${SVG("monitor")}View</button>` : ""}
       ${html && ready ? `<button class="cbtn" data-act="preview">${SVG("eye")}Preview</button>` : ""}
       ${html && ready ? `<button class="cbtn" data-act="openTab">${SVG("external")}Open</button>` : ""}
       ${html && ready ? `<button class="cbtn" data-act="dlfile">${SVG("down")}Save</button>` : ""}
-      <button class="cbtn" data-act="copy">${SVG("copy")}Copy</button></div>
-    <pre><code>${esc(c.code)}</code></pre></div>`;
+      <button class="cbtn" data-act="copy">${SVG("copy")}${isPatch && mdResolved ? "Copy file" : "Copy"}</button></div>
+    <pre><code>${isPatch ? patchHtml(c.code) : esc(c.code)}</code></pre></div>`;
 }
 
 /* ============ RENDER ============ */
@@ -942,7 +1228,7 @@ function addMsg(m, i, arr){
     el.innerHTML = `<div class="ubox">${(m.images||[]).length?`<div class="uimgs">${m.images.map(u=>`<img src="${u}" alt="">`).join("")}</div>`:""}<div class="bubble">${esc(m.shown||m.content)}</div><div class="msg-tools"><button type="button" class="icon-btn" data-act="copyu" title="Copy" aria-label="Copy message">${SVG("copy")}</button>${canEdit?`<button type="button" class="icon-btn" data-act="edit" title="Edit message" aria-label="Edit message">${SVG("edit")}</button>`:""}</div></div>`;
   } else {
     el.innerHTML = `<div class="bot-av"><svg><use href="#mark"/></svg></div><div class="bot"><div class="md"></div><div class="msg-tools"></div></div>`;
-    el.querySelector(".md").innerHTML = md(m.content);
+    mdResolved = m.applied ? m.applied.html : null; el.querySelector(".md").innerHTML = md(m.content); mdResolved = null;
     if(m.agents){ el.querySelector(".bot").insertBefore(buildAgentTalk(m.agents.log), el.querySelector(".md")); }
     if(m.thought){ const t = buildThink(m.thought.secs, m.thought.plan, m.thought.lvl); if(t) el.querySelector(".bot").insertBefore(t, el.querySelector(".md")); }
     tools(el, m);
@@ -1117,6 +1403,17 @@ async function submit(text, shown, images){
 
 async function respond(c){
   busy = true; abortFlag = false; setSendState();
+  /* decide how to answer: patch the current file, rebuild it, or start fresh; and which specialist playbook applies */
+  const lastU = [...c.messages].reverse().find(m=>m.role==="user"), ut = lastU ? lastU.content : "";
+  const base = currentCode(c);
+  const wantsRemake = REMAKE_RE.test(ut);
+  const partialPrev = !base && c.messages.some(m=>m.role==="assistant" && m.partial);
+  const editMode = !!base && !wantsRemake;
+  ROUTED = mode==="chat" ? (autoPlaybook(ut) || c.pb || null) : null;
+  EDIT = (wantsRemake && (base || partialPrev)) ? {mode:"remake"} : editMode ? {mode:"edit", base} : partialPrev ? {mode:"resume"} : null;
+  const hist = editMode ? apiHistory(c.messages) : c.messages;
+  let pN = -1, pR = null;
+  if(editMode || wantsRemake) Live.resume();   /* an open live preview follows the edit as each patch lands */
   const el = document.createElement("div");
   el.className = "msg assistant";
   el.innerHTML = `<div class="bot-av busy"><svg><use href="#mark"/></svg></div><div class="bot"><div class="md"></div><div class="live"><div class="dots"><i></i><i></i><i></i></div><span class="status">Thinking...</span></div><div class="progress"><i></i></div><div class="msg-tools"></div></div>`;
@@ -1130,7 +1427,13 @@ async function respond(c){
   stage.scrollTop = 1e9;
   const usePlan = EFFORTS[effort].plan && !AG.on; let wIdx = usePlan ? 2 : 1, agentRes = null;
   if(!AG.on){ Task.start("Working on your request", usePlan ? ["Read your request","Plan the approach","Write the answer","Final polish"] : ["Read your request","Write the answer","Final polish"]); Task.go(1); }
-  const paint = () => { raf=0; mdEl.innerHTML = md(full, true); if(Live.follow) Live.stream(full); const near = stage.scrollHeight - stage.scrollTop - stage.clientHeight < 160; if(near) stage.scrollTop = stage.scrollHeight; };
+  const paint = () => { raf=0;
+    if(editMode){
+      const n = (full.match(/>{5,9}[ \t]*REPLACE/g)||[]).length;
+      if(n !== pN){ pN = n; pR = n ? Patch.resolve(base, full) : null; if(pR && pR.ok && Live.follow) Live.push(pR.html); }
+    }
+    mdResolved = (pR && pR.ok) ? pR.html : null; mdEl.innerHTML = md(full, true); mdResolved = null;
+    if(Live.follow) Live.stream(full); const near = stage.scrollHeight - stage.scrollTop - stage.clientHeight < 160; if(near) stage.scrollTop = stage.scrollHeight; };
   try{
     let sys = buildSystem();
     if(usePlan){
@@ -1148,7 +1451,7 @@ async function respond(c){
       sys = buildSystem() + agentRes.notes; wIdx = agentRes.final; Task.go(wIdx);
       setTimeout(()=>talk.classList.remove("open"), 600);
     }
-    await streamAI(c.messages, t=>{
+    const onTok = t=>{
       full += t; tokens++;
       { const f = 1-Math.exp(-tokens/500); if(agentRes) Task.p((agentRes.total + Math.min(.95,f))/(agentRes.total+1)); else Task.wr(wIdx, Math.min(.92,f)); }
       if(tokens===1){
@@ -1158,7 +1461,18 @@ async function respond(c){
         if(thinkEl) el.querySelector(".bot").insertBefore(thinkEl, mdEl);
       }
       if(!raf) raf = requestAnimationFrame(paint);
-    }, sys);
+    };
+    await streamAI(hist, onTok, sys);
+    /* if a patch did not match the file, rewrite the complete file automatically instead of failing */
+    if(editMode && !abortFlag && Patch.has(full)){
+      const R0 = Patch.resolve(base, full);
+      if(!R0.total || R0.failed.length){
+        status.textContent = "Edits did not match, rewriting the full file...";
+        EDIT = {mode:"fallback", base}; full = "";
+        if(!raf) raf = requestAnimationFrame(paint);
+        await streamAI(c.messages, onTok, buildSystem(lastPlan) + (agentRes ? agentRes.notes : ""));
+      }
+    }
     if(!full.trim()) throw new Error("No response received. Make sure Puter is reachable and sign in if prompted.");
   }catch(e){
     const msg = (e && (e.message || e.error?.message || (typeof e==="string"?e:""))) || "Something went wrong.";
@@ -1166,18 +1480,24 @@ async function respond(c){
     else full += "\n\n_Generation interrupted._";
     failed = true;
   }
+  const cutOff = !!full && (full.match(/```/g)||[]).length % 2 === 1;
+  if(interrupting && full){ if(cutOff) full += "\n```"; full += "\n\n_Interrupted by you._"; }
   clearInterval(cycle); cancelAnimationFrame(raf); Task.finish(!failed && !!full);
   el.querySelector(".live")?.remove(); el.querySelector(".progress")?.remove();
   el.querySelector(".bot-av").classList.remove("busy");
+  let finalR = null;
+  if(full && editMode && Patch.has(full)){ const r = Patch.resolve(base, full); if(r.ok) finalR = r; }
   if(full){
-    mdEl.innerHTML = md(full);
-    c.messages.push({role:"assistant", content:full, ...(thinkEl ? {thought:{secs:thinkSecs, plan:lastPlan, lvl:effort}} : {}), ...(agentRes && agentRes.log.length ? {agents:{log:agentRes.log, n:agentRes.n}} : {})}); store.set(chats);
+    mdResolved = finalR ? finalR.html : null; mdEl.innerHTML = md(full); mdResolved = null;
+    const hasCode = !!finalR || /```(html|svg)/i.test(full);
+    c.messages.push({role:"assistant", content:full, ...(finalR ? {applied:{html:finalR.html, ok:finalR.ok, failed:finalR.failed.length}} : {}), ...(cutOff && !finalR && /```(html|svg)/i.test(full) ? {partial:true} : {}), ...(thinkEl ? {thought:{secs:thinkSecs, plan:lastPlan, lvl:effort}} : {}), ...(agentRes && agentRes.log.length ? {agents:{log:agentRes.log, n:agentRes.n}} : {})}); if(hasCode && pbOf()!=="chat") c.pb = pbOf(); store.set(chats);
     tools(el, {});
   } else { tools(el, {}); }
-  Live.end(full);
+  Live.end(full, finalR && finalR.html);
+  ROUTED = null; EDIT = null;
   busy = false; setSendState();
   stage.scrollTop = stage.scrollHeight;
-  if(full && !failed && smartOn()){
+  if(full && !failed && !interrupting && smartOn()){
     const last = c.messages[c.messages.length-1];
     makeSuggestions(c).then(list=>{
       if(!list.length || busy || cur!==c.id || c.messages[c.messages.length-1]!==last) return;
@@ -1220,6 +1540,10 @@ const Live = (()=>{
         <div class="lv-empty">Waiting for the first lines of code...</div>
         <div class="lv-shield"></div>
       </div>
+      <div class="lv-int">
+        <input type="text" class="lv-int-in" placeholder="Interrupt the build: tell Klint what to change..." aria-label="Interrupt the build and request a change" autocomplete="off" enterkeyhint="send">
+        <button type="button" data-lv="interrupt" title="Stop the build here and apply your change">${SVG("square")}Interrupt</button>
+      </div>
       <div class="lv-rs" data-lv-rs title="Resize"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M14 6L6 14M14 10l-4 4"/></svg></div>`;
     document.body.appendChild(win);
     dock = document.createElement("button");
@@ -1239,9 +1563,12 @@ const Live = (()=>{
       else if(a==="full") setFull(!S.full);
       else if(a==="device"){ S.phone = !S.phone; stage.classList.toggle("phone", S.phone); b.title = S.phone ? "Desktop view" : "Mobile view"; b.innerHTML = SVG(S.phone ? "monitor" : "phone"); }
       else if(a==="reload"){ S.shown = null; render(clean(S.src, !S.follow), !S.follow); }
+      else if(a==="interrupt") sendInterrupt();
       else if(a==="open"){ const u = URL.createObjectURL(new Blob([S.src],{type:"text/html"})); if(!window.open(u,"_blank")) toast("Allow pop-ups to open the preview"); }
     });
     dock.addEventListener("click", ()=>setMin(false));
+    const intIn = win.querySelector(".lv-int-in");
+    intIn.addEventListener("keydown", e=>{ if(e.key==="Enter" && !e.shiftKey && !e.isComposing){ e.preventDefault(); sendInterrupt(); } e.stopPropagation(); });
     win.querySelector(".lv-bar").addEventListener("dblclick", e=>{ if(!e.target.closest("button")) setFull(!S.full); });
     win.addEventListener("pointerdown", e=>{
       if(S.full || e.button>0) return;
@@ -1250,6 +1577,13 @@ const Live = (()=>{
     });
     document.addEventListener("keydown", e=>{ if(e.key==="Escape" && S.open && S.full) setFull(false); });
     addEventListener("resize", ()=>{ if(S.open && S.geo){ clampGeo(); applyGeo(); } });
+  }
+  function sendInterrupt(){
+    const inp = win.querySelector(".lv-int-in"), v = inp.value.trim();
+    if(!v){ inp.focus(); return; }
+    if(!busy){ toast("The build already finished"); return; }
+    inp.value = "";
+    interruptSend(v, v);
   }
   function mkFrame(){
     const f = document.createElement("iframe");
@@ -1303,7 +1637,7 @@ const Live = (()=>{
   function close(){
     S.open = false; S.follow = false; S.min = false; S.latest = null; S.pending = null; clearTimeout(S.timer); S.timer = 0;
     if(S.full) setFull(false);
-    win.classList.remove("show","min"); dock.classList.remove("show");
+    win.classList.remove("show","min","building"); dock.classList.remove("show");
     frames.forEach(f=>{ f.classList.remove("on"); f.srcdoc = ""; }); S.shown = null; emptyEl.style.display = "";
   }
   function status(){
@@ -1311,6 +1645,7 @@ const Live = (()=>{
     const kb = (S.size/1024).toFixed(1);
     statEl.textContent = S.follow ? "Building - "+kb+" KB" : (S.size ? "Ready - "+kb+" KB" : "");
     dotEl.classList.toggle("building", S.follow);
+    win.classList.toggle("building", S.follow);
     if(dock) dock.querySelector(".lv-dot").classList.toggle("building", S.follow);
   }
 
@@ -1354,7 +1689,7 @@ const Live = (()=>{
   }
   function extract(full){
     const re = /```(html|svg)[^\n]*\n([\s\S]*?)(```|$)/gi; let m, last = null;
-    while((m = re.exec(full))) last = { code:m[2], done:m[3]==="```" };
+    while((m = re.exec(full))){ if(/<{5,9}[ \t]*SEARCH/.test(m[2])) continue; last = { code:m[2], done:m[3]==="```" }; }
     return last;
   }
 
@@ -1370,11 +1705,13 @@ const Live = (()=>{
       queue(code, !follow);
       status();
     },
+    resume(){ if(!S.open) return; S.follow = true; status(); },
     stream(full){ if(!S.open) return; const x = extract(full); if(x) queue(x.code, false); },
-    end(full){
+    push(code){ if(!S.open || !S.follow || !code) return; queue(code, true); },
+    end(full, force){
       if(!S.follow) return;
       S.follow = false;
-      const x = extract(full || ""); if(x){ S.shown = null; queue(x.code, true); }
+      const x = force ? { code:force } : extract(full || ""); if(x){ S.shown = null; queue(x.code, true); }
       status();
     }
   };
@@ -1482,6 +1819,9 @@ const SLASH = [
   { cmd:"game",      d:"Switch to Games mode",      icon:"game",     run:()=>{ if(mode!=="game") setMode("game"); } },
   { cmd:"dashboard", d:"Switch to Dashboards mode", icon:"chart",    run:()=>{ if(mode!=="dash") setMode("dash"); } },
   { cmd:"research",  d:"Switch to Research mode",   icon:"research", run:()=>{ if(mode!=="research") setMode("research"); } },
+  { cmd:"app",       d:"Switch to Apps mode",       icon:"panel",    run:()=>{ if(mode!=="app") setMode("app"); } },
+  { cmd:"ui",        d:"Switch to UI & Motion mode", icon:"spark",    run:()=>{ if(mode!=="ui") setMode("ui"); } },
+  { cmd:"code",      d:"Switch to Code mode",       icon:"code",     run:()=>{ if(mode!=="code") setMode("code"); } },
   { cmd:"chat",      d:"Back to normal chat",       icon:"bubble",   run:()=>{ if(mode!=="chat") setMode("chat"); } },
   { cmd:"fast",      d:"Effort: Very low",          icon:"bolt",     run:()=>{ setEffort(0); toast("Effort: Very low"); } },
   { cmd:"deep",      d:"Effort: Very high",         icon:"brain",    run:()=>{ setEffort(4); toast("Effort: Very high"); } },
@@ -1493,6 +1833,9 @@ const INTENT = {
   web:      { label:"a website request",    name:"Websites",   re:/\b(landing page|web ?site|home ?page|portfolio|web page|online store|blog)\b/i },
   game:     { label:"a game request",       name:"Games",      re:/\b(game|snake|tetris|platformer|arcade|pong|2048|flappy)\b/i },
   dash:     { label:"a dashboard request",  name:"Dashboards", re:/\b(dashboard|analytics|kpi|admin panel|tracker|kanban)\b/i },
+  ui:       { label:"a UI or animation request", name:"UI & Motion", re:/\b(mobile app|app screen|ui kit|animation|animated|micro-?interaction|bottom sheet|onboarding flow)\b/i },
+  app:      { label:"an app or tool request", name:"Apps", re:/\b(calculator|converter|to-?do app|planner|timer|notes app|flashcards?|quiz app)\b/i },
+  code:     { label:"a coding request",       name:"Code", re:/\b(python|rust|golang|c\+\+|sql query|regex|bash script|algorithm)\b/i },
   research: { label:"a research question",  name:"Research",   re:/\b(explain|compare|research|difference between|pros and cons|how does|why does|what is)\b/i }
 };
 const detectIntent = t => Object.keys(INTENT).find(k=>INTENT[k].re.test(t)) || null;
