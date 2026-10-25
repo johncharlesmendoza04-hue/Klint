@@ -557,6 +557,54 @@ html[data-gem="error"][data-prov="gemini"] .model>b::after{background:#ff6b6b}
 .g.fail .ic{background:#ff5f57;box-shadow:none}
 @keyframes spin{to{transform:rotate(360deg)}}@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
 @media(max-width:760px){.thud{width:calc(100vw - 24px);top:56px;right:12px}}
+
+/* ===== Live activity panel ===== */
+.act{--ec:#4d8dff;margin:2px 0 12px;border:1px solid var(--line);background:var(--card);border-radius:16px;overflow:hidden;position:relative;max-width:540px;animation:actin .5s cubic-bezier(.2,1.1,.3,1) both;box-shadow:0 8px 28px -14px rgba(0,0,0,.45)}
+@keyframes actin{from{opacity:0;transform:translateY(10px) scale(.97);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+.act::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--ec),transparent) no-repeat;background-size:45% 100%;animation:actbar 1.7s linear infinite;z-index:1}
+@keyframes actbar{from{background-position:-60% 0}to{background-position:170% 0}}
+.act.fin::before{display:none}
+.act-h{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px 10px 10px;text-align:left;transition:background .2s}
+.act-h:hover{background:var(--card2)}
+.act-h:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:16px}
+.act-ic{width:28px;height:28px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--ec) 16%,transparent);color:var(--ec);position:relative;flex:none}
+.act-ic svg.i{width:16px;height:16px;animation:actspin 5s linear infinite}
+.act-ic::after{content:"";position:absolute;inset:-3px;border-radius:13px;border:1.5px solid var(--ec);opacity:0;animation:actring 1.9s ease-out infinite}
+.act.fin .act-ic::after,.act.fin .act-ic svg.i{animation:none}
+@keyframes actspin{to{transform:rotate(360deg)}}
+@keyframes actring{0%{opacity:.55;transform:scale(.82)}100%{opacity:0;transform:scale(1.28)}}
+.act-h .status{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13.5px;line-height:1.5}
+.act-t{font-style:normal;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.act-d{font-size:12px;color:var(--dim);flex:none;transition:opacity .2s}
+.act.open .act-d{display:none}
+.act-c{width:14px!important;height:14px!important;color:var(--muted);transition:transform .35s cubic-bezier(.2,1,.3,1);flex:none}
+.act.open .act-c{transform:rotate(180deg)}
+.act-b{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.2,1,.3,1)}
+.act.open .act-b{grid-template-rows:1fr}
+.act-bi{min-height:0;overflow:hidden}
+.act.open .act-bi{border-top:1px solid var(--line)}
+.act-in{padding:10px 14px 14px;display:grid;gap:14px}
+.act-steps,.rs-steps{list-style:none;display:grid;gap:1px;margin:0;padding:0}
+.act-steps .g{animation:miin .4s cubic-bezier(.2,1,.3,1) both}
+.act .g.active .ic::after{border-top-color:var(--ec)}
+.act .g.active{font-weight:500}
+.act-sec[hidden]{display:none!important}
+.act-lbl{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+.act-lbl i{width:6px;height:6px;border-radius:50%;background:var(--ec);display:block}
+.act:not(.fin) .act-lbl i{animation:pulse 1.2s ease-in-out infinite}
+.act-tx{font-size:12.5px;line-height:1.62;color:var(--muted);white-space:pre-wrap;word-break:break-word;max-height:200px;overflow:auto;padding:2px 0 2px 12px;border-left:2px solid color-mix(in srgb,var(--ec) 55%,transparent);scroll-behavior:smooth}
+.act-tx strong{color:var(--text);font-weight:600}
+.act:not(.fin) .act-think .act-tx::after{content:"";display:inline-block;width:6px;height:12px;margin-left:3px;background:var(--ec);vertical-align:-2px;border-radius:1px;animation:blink 1s steps(2) infinite}
+.act-meter{height:6px;border-radius:6px;background:var(--line2);overflow:hidden;position:relative}
+.act-meter i{position:absolute;inset:0;width:40%;border-radius:6px;background:linear-gradient(90deg,transparent,var(--ec),transparent);animation:slide 1.3s infinite ease-in-out}
+.act.fin .act-meter i{width:100%;animation:none;background:var(--ec)}
+.act-cs{display:block;margin-top:7px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.rsn-b{max-height:420px}
+.rs-steps{margin:0 0 10px;white-space:normal}
+.rs-steps .g{font-size:12.5px}
+.rs-sec{margin-top:12px;white-space:normal}
+.rsn-b .act-tx{max-height:none;scroll-behavior:auto}
+@media(prefers-reduced-motion:reduce){.act,.act *{animation:none!important;transition:none!important}}
 /* ===== Agent mode ===== */
 .agentbtn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:99px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12.5px;font-weight:590;box-shadow:inset 0 0 0 .5px var(--line2);transition:background .2s,color .2s,transform .2s cubic-bezier(.2,1,.3,1)}
 .agentbtn:hover{background:var(--card2);color:var(--text)}.agentbtn:active{transform:scale(.95)}
@@ -1280,7 +1328,7 @@ function addMsg(m, i, arr){
     el.innerHTML = `<div class="bot-av"><svg><use href="#mark"/></svg></div><div class="bot"><div class="md"></div><div class="msg-tools"></div></div>`;
     mdResolved = m.applied ? m.applied.html : null; el.querySelector(".md").innerHTML = md(m.content); mdResolved = null;
     if(m.agents){ el.querySelector(".bot").insertBefore(buildAgentTalk(m.agents.log), el.querySelector(".md")); }
-    if(m.thought){ const t = buildThink(m.thought.secs, m.thought.plan, m.thought.lvl); if(t) el.querySelector(".bot").insertBefore(t, el.querySelector(".md")); }
+    if(m.thought){ const t = buildThink(m.thought.secs, m.thought.plan, m.thought.lvl, m.thought); if(t) el.querySelector(".bot").insertBefore(t, el.querySelector(".md")); }
     tools(el, m);
     if(arr && i===arr.length-1 && m.suggest) renderSuggest(el, m.suggest);
   }
@@ -1451,14 +1499,14 @@ async function gemFetch(model, stream, body, signal){
   }
   return res;
 }
-async function gemReadSSE(res, onText, shouldStop){
+async function gemReadSSE(res, onText, shouldStop, onThought){
   const reader = res.body.getReader(), dec = new TextDecoder();
   let buf = "", finish = "", any = false;
   const handle = j => {
     if(j.error) throw new GemError(gemFriendly(j.error.code||0, j.error), j.error.code||0, j.error.status);
     const c = j.candidates && j.candidates[0];
     if(!c){ if(j.promptFeedback && j.promptFeedback.blockReason) throw new GemError("Gemini blocked this prompt (" + j.promptFeedback.blockReason + "). Try rewording it.", 0, "blocked"); return; }
-    for(const p of ((c.content && c.content.parts) || [])){ if(p.thought) continue; if(typeof p.text==="string" && p.text){ any = true; onText(p.text); } }
+    for(const p of ((c.content && c.content.parts) || [])){ if(p.thought){ if(onThought && typeof p.text==="string" && p.text) onThought(p.text); continue; } if(typeof p.text==="string" && p.text){ any = true; onText(p.text); } }
     if(c.finishReason) finish = c.finishReason;
   };
   const flush = chunk => {
@@ -1478,18 +1526,18 @@ async function gemReadSSE(res, onText, shouldStop){
   if(buf.trim()) flush(buf);
   if(!any && finish && finish!=="STOP") throw new GemError("Gemini stopped without replying (" + finish + "). Try rewording the request.", 0, finish);
 }
-async function geminiStream(history, onToken, system){
+async function geminiStream(history, onToken, system, onThought){
   const model = gemModel(), contents = gemContents(history);
   let lastErr;
   for(const withThink of [true, false]){
     const body = { systemInstruction:{ parts:[{ text: system || " " }] }, contents,
-      generationConfig:{ maxOutputTokens:65536, ...(withThink ? { thinkingConfig: gemThinking(model) } : {}) } };
+      generationConfig:{ maxOutputTokens:65536, ...(withThink ? { thinkingConfig: { ...gemThinking(model), includeThoughts:true } } : {}) } };
     const ctl = new AbortController();
     const watch = setInterval(()=>{ if(abortFlag) ctl.abort(); }, 120);
     let got = false;
     try{
       const res = await gemFetch(model, true, body, ctl.signal);
-      await gemReadSSE(res, t=>{ got = true; onToken(t); }, ()=>abortFlag);
+      await gemReadSSE(res, t=>{ got = true; onToken(t); }, ()=>abortFlag, onThought);
       return;
     }catch(e){
       if(abortFlag || (e && e.name==="AbortError")) return;
@@ -1642,8 +1690,8 @@ async function makePlan(history){
 }
 
 /* ============ AI ============ */
-async function streamAI(history, onToken, system){
-  if(provider()==="gemini") return geminiStream(history, onToken, system);
+async function streamAI(history, onToken, system, onThought){
+  if(provider()==="gemini") return geminiStream(history, onToken, system, onThought);
   const hasImg = history.some(m=>m.images&&m.images.length);
   const msgs = [{role:"system", content:system || buildSystem()}, ...history.map(m=>({role:m.role, content: (m.images&&m.images.length) ? [{type:"text",text:m.content}, ...m.images.map(u=>({type:"image_url", image_url:{url:u}}))] : m.content}))];
   const run = async (model, extra) => {
@@ -1710,14 +1758,15 @@ async function respond(c){
   if(editMode || wantsRemake) Live.resume();   /* an open live preview follows the edit as each patch lands */
   const el = document.createElement("div");
   el.className = "msg assistant";
-  el.innerHTML = `<div class="bot-av busy"><svg><use href="#mark"/></svg></div><div class="bot"><div class="md"></div><div class="live"><div class="dots"><i></i><i></i><i></i></div><span class="status">Thinking...</span></div><div class="progress"><i></i></div><div class="msg-tools"></div></div>`;
+  el.innerHTML = `<div class="bot-av busy"><svg><use href="#mark"/></svg></div><div class="bot"><div class="actslot"></div><div class="md"></div><div class="msg-tools"></div></div>`;
   $("#chat").appendChild(el);
+  const act = Act.create(); el.querySelector(".actslot").replaceWith(act.el);
   const mdEl = el.querySelector(".md"), status = el.querySelector(".status");
   const stage = $("#stage");
-  let si = 0, full = "", raf = 0, tokens = 0;
+  let si = 0, full = "", raf = 0, tokens = 0, wrote = false;
   let planning = false;
   const t0 = performance.now(); let thinkEl = null, thinkSecs = 0, lastPlan = "", failed = false;
-  const cycle = setInterval(()=>{ if(planning) return; si = Math.min(si+1, STATUS.length-1); status.textContent = (full ? (STATUS[Math.max(2,si)]) : STATUS[si]) + "..."; }, 2600);
+  const cycle = 0;
   stage.scrollTop = 1e9;
   const usePlan = EFFORTS[effort].plan && !AG.on; let wIdx = usePlan ? 2 : 1, agentRes = null;
   if(!AG.on){ Task.start("Working on your request", usePlan ? ["Read your request","Plan the approach","Write the answer","Final polish"] : ["Read your request","Write the answer","Final polish"]); Task.go(1); }
@@ -1726,20 +1775,20 @@ async function respond(c){
       const n = (full.match(/>{5,9}[ \t]*REPLACE/g)||[]).length;
       if(n !== pN){ pN = n; pR = n ? Patch.resolve(base, full) : null; if(pR && pR.ok && Live.follow) Live.push(pR.html); }
     }
-    mdResolved = (pR && pR.ok) ? pR.html : null; mdEl.innerHTML = md(full, true); mdResolved = null;
+    mdResolved = (pR && pR.ok) ? pR.html : null; mdEl.innerHTML = md(full, true); mdResolved = null; act.code(full);
     if(Live.follow) Live.stream(full); const near = stage.scrollHeight - stage.scrollTop - stage.clientHeight < 160; if(near) stage.scrollTop = stage.scrollHeight; };
   try{
     let sys = buildSystem();
     if(usePlan){
-      planning = true; status.textContent = (EFFORTS[effort].plan===2 ? "Thinking it through" : "Planning") + "...";
+      planning = true; act.go("plan", EFFORTS[effort].plan===2 ? "Thinking it through" : "Planning the approach");
       let plan = ""; try{ plan = await makePlan(c.messages); }catch(_){}
       planning = false;
       if(abortFlag) throw new Error("Stopped.");
-      if(plan){ sys = buildSystem(plan); lastPlan = plan; }
+      if(plan){ sys = buildSystem(plan); lastPlan = plan; act.plan(plan); }
       Task.go(wIdx);
     }
     if(AG.on){
-      planning = true; const talk = buildAgentTalk(); el.querySelector(".bot").insertBefore(talk, mdEl);
+      planning = true; act.go("agents","Agent team is discussing"); const talk = buildAgentTalk(); el.querySelector(".bot").insertBefore(talk, mdEl);
       agentRes = await runAgents(c, talk, status);
       planning = false; if(abortFlag) throw new Error("Stopped.");
       sys = buildSystem() + agentRes.notes; wIdx = agentRes.final; Task.go(wIdx);
@@ -1748,23 +1797,19 @@ async function respond(c){
     const onTok = t=>{
       full += t; tokens++;
       { const f = 1-Math.exp(-tokens/500); if(agentRes) Task.p((agentRes.total + Math.min(.95,f))/(agentRes.total+1)); else Task.wr(wIdx, Math.min(.92,f)); }
-      if(tokens===1){
-        si = 2; status.textContent = "Building...";
-        thinkSecs = Math.round((performance.now()-t0)/1000);
-        thinkEl = buildThink(thinkSecs, lastPlan);
-        if(thinkEl) el.querySelector(".bot").insertBefore(thinkEl, mdEl);
-      }
+      if(!wrote){ wrote = true; act.go("write","Writing the answer"); }
       if(!raf) raf = requestAnimationFrame(paint);
     };
-    await streamAI(hist, onTok, sys);
+    act.go("think","Thinking it through");
+    await streamAI(hist, onTok, sys, act.thought);
     /* if a patch did not match the file, rewrite the complete file automatically instead of failing */
     if(editMode && !abortFlag && Patch.has(full)){
       const R0 = Patch.resolve(base, full);
       if(!R0.total || R0.failed.length){
-        status.textContent = "Edits did not match, rewriting the full file...";
+        act.go("fallback","Edits did not match, rewriting the full file"); wrote = true;
         EDIT = {mode:"fallback", base}; full = "";
         if(!raf) raf = requestAnimationFrame(paint);
-        await streamAI(c.messages, onTok, buildSystem(lastPlan) + (agentRes ? agentRes.notes : ""));
+        await streamAI(c.messages, onTok, buildSystem(lastPlan) + (agentRes ? agentRes.notes : ""), act.thought);
       }
     }
     if(!full.trim()) throw new Error(provider()==="gemini" ? "No response received from Gemini. Check your key and model in Settings." : "No response received. Make sure Puter is reachable and sign in if prompted.");
@@ -1778,14 +1823,16 @@ async function respond(c){
   const cutOff = !!full && (full.match(/```/g)||[]).length % 2 === 1;
   if(interrupting && full){ if(cutOff) full += "\n```"; full += "\n\n_Interrupted by you._"; }
   clearInterval(cycle); cancelAnimationFrame(raf); Task.finish(!failed && !!full);
-  el.querySelector(".live")?.remove(); el.querySelector(".progress")?.remove();
+  const actRes = act.finish(!failed && !!full); thinkSecs = Math.round((performance.now()-t0)/1000);
+  act.el.remove();
+  if(full){ thinkEl = buildThink(thinkSecs, lastPlan, effort, actRes); if(thinkEl) el.querySelector(".bot").insertBefore(thinkEl, mdEl); }
   el.querySelector(".bot-av").classList.remove("busy");
   let finalR = null;
   if(full && editMode && Patch.has(full)){ const r = Patch.resolve(base, full); if(r.ok) finalR = r; }
   if(full){
     mdResolved = finalR ? finalR.html : null; mdEl.innerHTML = md(full); mdResolved = null;
     const hasCode = !!finalR || /```(html|svg)/i.test(full);
-    c.messages.push({role:"assistant", content:full, ...(finalR ? {applied:{html:finalR.html, ok:finalR.ok, failed:finalR.failed.length}} : {}), ...(cutOff && !finalR && /```(html|svg)/i.test(full) ? {partial:true} : {}), ...(thinkEl ? {thought:{secs:thinkSecs, plan:lastPlan, lvl:effort}} : {}), ...(agentRes && agentRes.log.length ? {agents:{log:agentRes.log, n:agentRes.n}} : {})}); if(hasCode && pbOf()!=="chat") c.pb = pbOf(); store.set(chats);
+    c.messages.push({role:"assistant", content:full, ...(finalR ? {applied:{html:finalR.html, ok:finalR.ok, failed:finalR.failed.length}} : {}), ...(cutOff && !finalR && /```(html|svg)/i.test(full) ? {partial:true} : {}), ...(thinkEl ? {thought:{secs:thinkSecs, plan:lastPlan, lvl:effort, steps:actRes.steps, reasoning:(actRes.reasoning||"").slice(0,6000)}} : {}), ...(agentRes && agentRes.log.length ? {agents:{log:agentRes.log, n:agentRes.n}} : {})}); if(hasCode && pbOf()!=="chat") c.pb = pbOf(); store.set(chats);
     tools(el, {});
   } else { tools(el, {}); }
   Live.end(full, finalR && finalR.html);
@@ -2024,15 +2071,92 @@ async function quickChat(sys, user, ms){
 }
 
 /* --- reasoning panel ("Thought for Xs") --- */
-function buildThink(secs, plan, lvl){
-  if(!plan && secs<1) return null;
+const fmtThought = t => esc(t||"").replace(/\*\*([^*\n]+)\*\*/g,"<strong>$1</strong>");
+function buildThink(secs, plan, lvl, x){
+  const steps = (x && x.steps) || [], rs = (x && x.reasoning) || "";
+  if(!plan && !rs && !steps.length && secs<1) return null;
+  const rich = !!(plan || rs || steps.length);
   const d = document.createElement("div");
-  d.className = "rsn" + (plan ? "" : " static");
+  d.className = "rsn" + (rich ? "" : " static");
   d.style.setProperty("--ec", EFFORTS[lvl ?? effort].color);
-  d.innerHTML = `<button type="button" class="rsn-h" ${plan?'data-act="think"':'tabindex="-1"'}>${SVG("spark")}<span>Thought for ${Math.max(1,secs)}s</span><svg class="i rsn-c"><use href="#chev"/></svg></button><div class="rsn-b"></div>`;
-  d.querySelector(".rsn-b").textContent = plan || "";
+  d.innerHTML = `<button type="button" class="rsn-h" ${rich?'data-act="think"':'tabindex="-1"'}>${SVG("spark")}<span>Thought for ${Math.max(1,secs)}s</span><svg class="i rsn-c"><use href="#chev"/></svg></button><div class="rsn-b"></div>`;
+  const body = d.querySelector(".rsn-b");
+  if(steps.length){
+    const ul = document.createElement("ul"); ul.className = "rs-steps";
+    steps.forEach(s=>{ const li = document.createElement("li"); li.className = "g done"; li.innerHTML = '<i class="ic"><svg viewBox="0 0 16 16"><path d="M4 8.5l3 3 5.5-6"/></svg></i><span></span><small></small>'; li.querySelector("span").textContent = s.l; li.querySelector("small").textContent = s.t>=1 ? s.t+"s" : ""; ul.appendChild(li); });
+    body.appendChild(ul);
+  }
+  const sec = (label, html) => { const w = document.createElement("div"); w.className = "rs-sec"; w.innerHTML = '<div class="act-lbl"><i></i>'+label+'</div><div class="act-tx"></div>'; w.querySelector(".act-tx").innerHTML = html; body.appendChild(w); };
+  if(plan) sec("Plan", esc(plan));
+  if(rs) sec("Reasoning", fmtThought(rs));
   return d;
 }
+
+/* --- live activity panel: click it while Klint works to watch steps, reasoning and code progress --- */
+const Act = { create(){
+  const d = document.createElement("div"); d.className = "act"; d.style.setProperty("--ec", EFFORTS[effort].color);
+  d.innerHTML = `<button type="button" class="act-h" aria-expanded="false" aria-label="Show what Klint is doing"><span class="act-ic">${SVG("spark")}</span><span class="status">Starting...</span><em class="act-t">0s</em><span class="act-d">Details</span><svg class="i act-c"><use href="#chev"/></svg></button><div class="act-b"><div class="act-bi"><div class="act-in"><ul class="act-steps"></ul><div class="act-sec act-plan" hidden><div class="act-lbl"><i></i>Plan</div><div class="act-tx"></div></div><div class="act-sec act-think" hidden><div class="act-lbl"><i></i>Reasoning</div><div class="act-tx"></div></div><div class="act-sec act-code" hidden><div class="act-lbl"><i></i>Code</div><div class="act-meter"><i></i></div><small class="act-cs"></small></div></div></div></div>`;
+  const q = s => d.querySelector(s);
+  const head = q(".act-h"), statusEl = q(".status"), timeEl = q(".act-t"), list = q(".act-steps");
+  const thinkSec = q(".act-think"), thinkTx = thinkSec.querySelector(".act-tx"), planSec = q(".act-plan"), codeSec = q(".act-code"), cs = q(".act-cs");
+  const st = { steps:[], cur:null, R:"", raf:0, t0:performance.now() };
+  const now = () => (performance.now()-st.t0)/1000;
+  head.addEventListener("click", ()=>{ const o = d.classList.toggle("open"); head.setAttribute("aria-expanded", o ? "true" : "false"); });
+  const tick = setInterval(()=>{ const t = Math.floor(now()); timeEl.textContent = t<60 ? t+"s" : Math.floor(t/60)+"m "+(t%60)+"s"; }, 1000);
+  function mk(id, label){
+    const li = document.createElement("li"); li.className = "g";
+    li.innerHTML = '<i class="ic"><svg viewBox="0 0 16 16"><path d="M4 8.5l3 3 5.5-6"/></svg></i><span></span><small></small>';
+    li.querySelector("span").textContent = label; list.appendChild(li);
+    const s = { id, label, li, t0:now(), t:0 }; st.steps.push(s); return s;
+  }
+  function close(s, ok){ s.t = now()-s.t0; s.li.className = "g " + (ok===false ? "fail" : "done"); s.li.querySelector("small").textContent = s.t>=1 ? Math.round(s.t)+"s" : ""; }
+  function renderThought(){
+    st.raf = 0;
+    const near = thinkTx.scrollHeight - thinkTx.scrollTop - thinkTx.clientHeight < 40;
+    thinkTx.innerHTML = fmtThought(st.R);
+    if(near) thinkTx.scrollTop = thinkTx.scrollHeight;
+    if(st.cur && st.cur.id==="think"){
+      const m = [...st.R.matchAll(/\*\*([^*\n]{3,70})\*\*/g)];
+      if(m.length) statusEl.textContent = m[m.length-1][1].replace(/[.:\s]+$/,"") + "...";
+    }
+  }
+  const api = {
+    el:d,
+    get cur(){ return st.cur; },
+    go(id, label){
+      let s = st.steps.find(x=>x.id===id);
+      if(s && st.cur===s) return;
+      if(st.cur) close(st.cur);
+      if(!s) s = mk(id, label||id);
+      s.t0 = now(); s.li.className = "g active"; s.li.querySelector("small").textContent = ""; st.cur = s;
+      statusEl.textContent = (label||s.label) + "...";
+    },
+    sub(text){ if(st.cur) st.cur.li.querySelector("small").textContent = text||""; },
+    plan(text){ planSec.hidden = false; planSec.querySelector(".act-tx").textContent = text; },
+    thought(t){ st.R += t; thinkSec.hidden = false; if(!st.raf) st.raf = requestAnimationFrame(renderThought); },
+    code(full){
+      const n = (full.match(/```/g)||[]).length; if(!n) return;
+      if(n%2===1){
+        const i = full.lastIndexOf("```"), rest = full.slice(i+3), nl = rest.indexOf("\n");
+        const lang = ((nl<0 ? rest : rest.slice(0,nl)).trim() || "code").toLowerCase();
+        const body = nl<0 ? "" : rest.slice(nl+1), lines = body ? body.split("\n").length : 0, kb = (body.length/1024).toFixed(1);
+        if(lang==="patch"){ const k = (full.match(/>{5,9}[ \t]*REPLACE/g)||[]).length; api.go("edit","Applying edits"); cs.textContent = k+" change"+(k===1?"":"s")+" applied · "+lines+" lines"; api.sub(k+" applied"); }
+        else { api.go("code","Writing "+lang+" code"); cs.textContent = lang+" · "+lines+" lines · "+kb+" KB"; api.sub(lines+" lines"); }
+        codeSec.hidden = false;
+      } else if(st.cur && (st.cur.id==="code" || st.cur.id==="edit")){
+        cs.textContent += " · complete"; api.go("wrap","Writing the summary");
+      }
+    },
+    finish(ok){
+      clearInterval(tick); if(st.raf){ cancelAnimationFrame(st.raf); renderThought(); }
+      if(st.cur) close(st.cur, ok);
+      d.classList.add("fin");
+      return { steps: st.steps.map(s=>({ l:s.label, t:Math.round(s.t) })), reasoning: st.R };
+    }
+  };
+  api.go("read","Reading your request");
+  return api;
+}};
 
 /* --- follow-up suggestions --- */
 const SUGGEST_SYS = "You write follow-up prompts for a chat with an AI that builds websites, apps and games and answers questions. Return ONLY a JSON array of exactly 3 short follow-up prompts (max 7 words each) that the user is likely to send next, written the way the user would say them (imperative and specific to this conversation). No markdown and no extra text.";
