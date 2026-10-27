@@ -2558,6 +2558,62 @@ def("run", {icon: "code", label: "Try it", persist: false,
 return {has: l => /^ui-/.test(l) && !!DEFS[l.slice(3)], render, names: () => Object.keys(DEFS), defs: DEFS};
 })();
 
+/* ============ OPENROUTER (Claude Haiku 5.5) ============ */
+const OR_DEFAULT = "anthropic/claude-haiku-5.5";
+const orKey = () => PREFS.get("or_key", "").trim();
+const orModel = () => (PREFS.get("or_model", "") || OR_DEFAULT).trim();
+const orErr = (st, j) => { const m = (j && j.error && (j.error.message || j.error)) || ""; return st === 401 ? "OpenRouter rejected your API key. Check it in Settings." : st === 402 ? "Your OpenRouter account is out of credits. Add credits at openrouter.ai/credits." : st === 429 ? "OpenRouter rate limit reached. Wait a moment and retry." : st === 404 ? "Model not found on OpenRouter: " + orModel() : "OpenRouter error" + (st ? " (" + st + ")" : "") + (m ? ": " + (typeof m === "string" ? m : JSON.stringify(m)) : ""); };
+function orBody(history, system, stream, reasoning){
+  const msgs = [{role: "system", content: system || buildSystem()}, ...history.map(m => ({role: m.role, content: (m.images && m.images.length) ? [{type: "text", text: m.content}, ...m.images.map(u => ({type: "image_url", image_url: {url: u}}))] : m.content}))];
+  const b = {model: orModel(), messages: msgs, stream, max_tokens: 32000};
+  if(reasoning) b.reasoning = {effort: EFFORTS[effort].api};
+  return b;
+}
+async function orFetch(body, signal){
+  let res;
+  try{ res = await fetch("https://openrouter.ai/api/v1/chat/completions", {method: "POST", signal, headers: {"Authorization": "Bearer " + orKey(), "Content-Type": "application/json", "HTTP-Referer": (location.origin && location.origin !== "null") ? location.origin : "https://klint.app", "X-Title": "Klint"}, body: JSON.stringify(body)}); }
+  catch(e){ if(e && e.name === "AbortError") throw e; throw new Error("Couldn't reach OpenRouter. Check your internet connection."); }
+  if(!res.ok){ let j = null; try{ j = await res.json(); }catch(_){} const e = new Error(orErr(res.status, j)); e.status = res.status; e.raw = j; throw e; }
+  return res;
+}
+async function orStream(history, onToken, system, onThought){
+  for(const withR of [true, false]){
+    const ctl = new AbortController(), watch = setInterval(() => { if(abortFlag) ctl.abort(); }, 120); let got = false;
+    try{
+      const res = await orFetch(orBody(history, system, true, withR && EFFORTS[effort].api !== "minimal"), ctl.signal);
+      const rd = res.body.getReader(), dec = new TextDecoder(); let buf = "";
+      for(;;){
+        const {done, value} = await rd.read(); if(done) break;
+        if(abortFlag){ try{ rd.cancel(); }catch(_){} break; }
+        buf += dec.decode(value, {stream: true}); let i;
+        while((i = buf.indexOf("\n")) >= 0){
+          const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+          if(!line.startsWith("data:")) continue; const d = line.slice(5).trim(); if(d === "[DONE]") continue;
+          let j; try{ j = JSON.parse(d); }catch(_){ continue; }
+          if(j.error){ const e = new Error(orErr(j.error.code || 0, j)); e.status = j.error.code; throw e; }
+          const dl = (j.choices && j.choices[0] && j.choices[0].delta) || {};
+          if(dl.reasoning && onThought) onThought(dl.reasoning);
+          if(dl.content){ got = true; onToken(dl.content); }
+        }
+      }
+      return;
+    }catch(e){
+      if(abortFlag || (e && e.name === "AbortError")) return;
+      if(!got && withR && e.status === 400 && /reason|effort|thinking/i.test(e.message + JSON.stringify(e.raw || ""))) continue;
+      throw e;
+    }finally{ clearInterval(watch); }
+  }
+}
+async function orOnce(msgs){
+  for(const withR of [false]){
+    const res = await orFetch({model: orModel(), messages: msgs, stream: false, max_tokens: 4000});
+    const j = await res.json(); return ((j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || "").trim();
+  }
+}
+const orPanel = () => `<div class="s-sec">OpenRouter</div>
+        <div class="srow col"><div><b>API key</b><small>Get one at openrouter.ai/keys. It is stored only in this browser.</small></div><div style="display:flex;gap:8px;align-items:center"><input id="orKey" class="tin" style="flex:1;min-height:0;height:38px" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-v1-..." value="${esc(orKey())}"><button type="button" class="btn" data-s="or-show">Show</button></div></div>
+        <div class="srow col"><div><b>Model</b><small>Default is Claude Haiku 5.5. Any OpenRouter model id works.</small></div><input id="orModel" class="tin" style="min-height:0;height:38px" type="text" spellcheck="false" placeholder="${OR_DEFAULT}" value="${esc(PREFS.get("or_model", ""))}"></div>`;
+
 /* ============ LIVING UI PROMPT + GALLERY ============ */
 const KX_DOC = [
 ["chart","Charts","bar, line, area, pie, donut, scatter, radar. Switch type, hide series, PNG and CSV export","Compare monthly sales for three products as a chart I can switch between bar and line"],
@@ -2794,10 +2850,10 @@ const GEMINI_MODELS = [
   { id:"gemini-2.5-flash-lite",  name:"Gemini 2.5 Flash-Lite",  tier:"Legacy",   price:"$0.10 in / $0.40 out", note:"Legacy and cheapest. May be closed to new projects." }
 ];
 const FAST_GEM = "gemini-3.5-flash-lite";   /* used for side tasks (titles, suggestions) when the main model is Pro or Argon */
-const provider = () => PREFS.get("provider","gemini");
+const provider = () => PREFS.get("provider","openrouter");
 const gemKey = () => PREFS.get("gem_key","");
 const gemModel = () => PREFS.get("gem_model","gemini-3.5-flash-lite");
-const needsKey = () => provider()==="gemini" && !gemKey();
+const needsKey = () => (provider()==="gemini" && !gemKey()) || (provider()==="openrouter" && !orKey());
 function gemList(){
   let loaded = []; try{ loaded = JSON.parse(PREFS.get("gem_models","[]")) || []; }catch(_){}
   if(!loaded.length) return GEMINI_MODELS;
@@ -2928,6 +2984,7 @@ async function geminiOnce(msgs, model, maxTok){
 }
 /* one non-streaming call for the planner (side=false) and for titles and suggestions (side=true) */
 async function llmOnce(msgs, side){
+  if(provider()==="openrouter") return await orOnce(msgs);
   if(provider()==="puter"){
     for(const model of [BASE_MODEL, FALLBACK_MODEL]){
       try{ const o = { stream:false }; if(model) o.model = model; const t = textOf(await puter.ai.chat(msgs, o)).trim(); if(t) return t; }catch(_){}
@@ -3048,6 +3105,7 @@ async function makePlan(history){
 
 /* ============ AI ============ */
 async function streamAI(history, onToken, system, onThought){
+  if(provider()==="openrouter") return orStream(history, onToken, system, onThought);
   if(provider()==="gemini") return geminiStream(history, onToken, system, onThought);
   const hasImg = history.some(m=>m.images&&m.images.length);
   const msgs = [{role:"system", content:system || buildSystem()}, ...history.map(m=>({role:m.role, content: (m.images&&m.images.length) ? [{type:"text",text:m.content}, ...m.images.map(u=>({type:"image_url", image_url:{url:u}}))] : m.content}))];
@@ -3193,7 +3251,7 @@ async function respond(c){
         }
       }
     }
-    if(!full.trim()) throw new Error(provider()==="gemini" ? "No response received from Gemini. Check your key and model in Settings." : "No response received. Make sure Puter is reachable and sign in if prompted.");
+    if(!full.trim()) throw new Error(provider()==="openrouter" ? "No response received from OpenRouter. Check your key and model in Settings." : provider()==="gemini" ? "No response received from Gemini. Check your key and model in Settings." : "No response received. Make sure Puter is reachable and sign in if prompted.");
   }catch(e){
     let msg = (e && (e.message || e.error?.message || e.msg || (typeof e==="string"?e:""))) || "Something went wrong.";
     if(provider()==="puter" && /token|unauthori|401|not signed|sign.?in|auth/i.test(String((e&&(e.code||e.error&&e.error.code))||"")+" "+msg)) msg += " Open Settings, then Account, and sign in again.";
@@ -3791,9 +3849,9 @@ function authState(){
 }
 const needsSignIn = () => provider()==="puter" && authState() === false;
 function promptForKey(){
-  toast("Add your Gemini API key in Settings to start", 4000);
+  toast(provider()==="openrouter" ? "Add your OpenRouter API key in Settings to start" : "Add your Gemini API key in Settings to start", 4000);
   openSettings();
-  setTimeout(()=>{ const k = $("#gemKey"); if(k){ k.focus(); k.scrollIntoView({block:"center"}); } }, 80);
+  setTimeout(()=>{ const k = $("#orKey") || $("#gemKey"); if(k){ k.focus(); k.scrollIntoView({block:"center"}); } }, 80);
 }
 function authHints(){
   const h = [];
@@ -3880,8 +3938,8 @@ function paintSettings(){
         <div class="srow"><div><b>Smart suggestions</b><small>Follow-up chips and AI chat titles after replies</small></div>${seg("smart",[["on","On"],["off","Off"]],PREFS.get("smart","on"))}</div>
         <div class="srow col"><div><b>Custom instructions</b><small>Tell Klint how you like answers, your tech stack or design taste. Applied to every chat.</small></div><textarea id="customIns" class="tin" rows="3" maxlength="1500" placeholder="e.g. I use vanilla JS. I like dark, minimal designs. Keep explanations short.">${esc(PREFS.get("custom",""))}</textarea></div>
         <div class="s-sec">AI engine</div>
-        <div class="srow"><div><b>Provider</b><small>${provider()==="gemini" ? "Your own Gemini API key, billed by Google" : "Puter account (user pays), no key needed"}</small></div>${seg("provider",[["gemini","Gemini API"],["puter","Puter"]],provider())}</div>
-        ${provider()==="gemini" ? geminiPanel() : `<div class="s-sec">Puter account</div><div class="acct-box" id="acctBox"></div>`}
+        <div class="srow"><div><b>Provider</b><small>${provider()==="openrouter" ? "OpenRouter key, Claude Haiku 5.5 by default" : provider()==="gemini" ? "Your own Gemini API key, billed by Google" : "Puter account (user pays), no key needed"}</small></div>${seg("provider",[["openrouter","OpenRouter"],["gemini","Gemini API"],["puter","Puter"]],provider())}</div>
+        ${provider()==="openrouter" ? orPanel() : provider()==="gemini" ? geminiPanel() : `<div class="s-sec">Puter account</div><div class="acct-box" id="acctBox"></div>`}
         <div class="s-sec">Data and shortcuts</div>
         <div class="srow"><div><b>Chats</b><small>${chats.length} saved on this device</small></div><button type="button" class="btn danger" data-s="clear">${SVG("trash")}Clear all</button></div>
         <div class="srow"><div><b>New chat</b><small>Start a fresh conversation</small></div><kbd><span>Ctrl</span><span>N</span></kbd></div>`}
@@ -3896,7 +3954,7 @@ function openSettings(){
   if(!m){
     m = document.createElement("div"); m.id = "settings"; m.className = "modal";
     document.body.appendChild(m);
-    m.addEventListener("input", e=>{ if(e.target && e.target.id==="gemKey"){ PREFS.set("gem_key", e.target.value.trim()); scheduleGemCheck(); } else if(e.target && e.target.id==="customIns") PREFS.set("custom", e.target.value.slice(0,1500)); });
+    m.addEventListener("input", e=>{ if(e.target && e.target.id==="orKey") PREFS.set("or_key", e.target.value.trim()); else if(e.target && e.target.id==="orModel") PREFS.set("or_model", e.target.value.trim()); else if(e.target && e.target.id==="gemKey"){ PREFS.set("gem_key", e.target.value.trim()); scheduleGemCheck(); } else if(e.target && e.target.id==="customIns") PREFS.set("custom", e.target.value.slice(0,1500)); });
     m.addEventListener("change", e=>{ if(e.target && e.target.id==="gemModel"){ PREFS.set("gem_model", e.target.value); toast("Model: "+e.target.value); paintSettings(); scheduleGemCheck(); } });
     m.addEventListener("click", async e=>{
       if(e.target===m) return closeSettings();
@@ -3916,6 +3974,7 @@ function openSettings(){
       }
       else if(a==="stab"){ window.__kxTab = b.dataset.t; paintSettings(); }
       else if(a==="kxtry"){ closeSettings(); if(busy) return toast("Wait for the reply to finish"); submit(KX_DOC[+b.dataset.i][3]); }
+      else if(a==="or-show"){ const k = $("#orKey"); if(k){ const show = k.type==="password"; k.type = show ? "text" : "password"; b.textContent = show ? "Hide" : "Show"; } }
       else if(a==="gem-show"){ const k = $("#gemKey"); if(k){ const show = k.type==="password"; k.type = show ? "text" : "password"; b.textContent = show ? "Hide" : "Show"; } }
       else if(a==="gem-test") geminiTest();
       else if(a==="gem-load") gemLoadModels();
@@ -3937,6 +3996,7 @@ function closeSettings(){ const m = $("#settings"); if(m) m.classList.remove("op
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSettings(); });
 $("#settingsBtn").onclick = openSettings;
 applyTheme(); applyFs();
+if(PREFS.get("or_mig","")!=="1"){ PREFS.set("provider","openrouter"); PREFS.set("or_mig","1"); }
 if(PREFS.get("gem_mig","")!=="35fl"){ PREFS.set("gem_model","gemini-3.5-flash-lite"); PREFS.set("gem_mig","35fl"); }   /* one-time switch to Gemini 3.5 Flash-Lite (Budget) */
 paintGemStat(); if(provider()==="gemini" && gemKey()) checkGemKey();
 
