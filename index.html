@@ -1638,12 +1638,12 @@ Mode focus: code. Use the language the user names. Deliver runnable code with en
 };
 const GPT_HINT = `
 
-# Engine notes (GPT-6 Luna)
+# Engine notes
 - Treat the system instructions as binding. Think privately, then output only the final answer in the required format.
 - Living UI blocks: write the fence exactly as three backticks followed by the block name (for example ui-chart), then ONE valid JSON object with double quotes, no comments, no trailing commas, then closing backticks. Never wrap a block in another code fence and never add prose inside it.
 - Code: always return complete files or exact patch blocks in the required format. Never truncate, never use placeholders like "rest of code here".
 - Keep prose short and plain: no preamble, no restating the request.`;
-const oaExtras = () => (provider()==="openrouter" && /^openai\//i.test(PREFS.get("or_model","") || OR_DEFAULT)) ? GPT_HINT : "";
+const oaExtras = () => (provider()==="hf" || (provider()==="openrouter" && /^openai\//i.test(PREFS.get("or_model","") || OR_DEFAULT))) ? GPT_HINT : "";
 const gemExtras = () => provider()==="gemini" ? GEM_BASE_HINT + (GEM_MODE[pbOf()]||"") : "";
 const buildSystemFull = plan => {
   const tail = "\n\n# Effort level: " + EFFORTS[effort].name + "\n" + EFFORTS[effort].hint
@@ -2642,15 +2642,27 @@ return {has: l => /^ui-/.test(l) && !!DEFS[l.slice(3)], render, names: () => Obj
 
 /* ============ OPENROUTER (GPT-6 Luna) ============ */
 const OR_DEFAULT = "openai/gpt-6-luna";
-const orKey = () => PREFS.get("or_key", "").trim();
-const orModel = () => (PREFS.get("or_model", "") || OR_DEFAULT).trim();
-const orErr = (st, j) => { const m = (j && j.error && (j.error.message || j.error)) || ""; return st === 401 ? "OpenRouter rejected your API key. Check it in Settings." : st === 402 ? "Your OpenRouter account is out of credits. Add credits at openrouter.ai/credits." : st === 429 ? "OpenRouter rate limit reached. Wait a moment and retry." : st === 404 ? "Model not found on OpenRouter: " + orModel() : "OpenRouter error" + (st ? " (" + st + ")" : "") + (m ? ": " + (typeof m === "string" ? m : JSON.stringify(m)) : ""); };
+const HF_DEFAULT = "deepseek-ai/DeepSeek-V4.1-Flash";
+const isHF = () => PREFS.get("provider","openrouter") === "hf";
+const apiName = () => isHF() ? "Hugging Face" : "OpenRouter";
+/* orKey / orModel / orErr / orFetch serve whichever OpenAI-compatible provider is active (OpenRouter or Hugging Face) */
+const orKey = () => (isHF() ? PREFS.get("hf_key", "") : PREFS.get("or_key", "")).trim();
+const orModel = () => (isHF() ? (PREFS.get("hf_model", "") || HF_DEFAULT) : (PREFS.get("or_model", "") || OR_DEFAULT)).trim();
+const orErr = (st, j) => {
+  const m = (j && j.error && (j.error.message || j.error)) || "", n = apiName();
+  return st === 401 || st === 403 ? (isHF() ? "Hugging Face rejected your token. Create one with the \"Make calls to Inference Providers\" permission and paste it in Settings." : "OpenRouter rejected your API key. Check it in Settings.")
+    : st === 402 ? (isHF() ? "Your Hugging Face Inference Providers credits are used up. Check huggingface.co/settings/billing." : "Your OpenRouter account is out of credits. Add credits at openrouter.ai/credits.")
+    : st === 429 ? n + " rate limit reached. Wait a moment and retry."
+    : st === 404 || (isHF() && st === 400 && /model.*(not|unknown|exist|support)/i.test(JSON.stringify(m))) ? "Model not found on " + n + ": " + orModel() + (isHF() ? ". Copy the id from the model page on huggingface.co (for example deepseek-ai/DeepSeek-V4.1-Flash) and check that an Inference Provider serves it." : "")
+    : n + " error" + (st ? " (" + st + ")" : "") + (m ? ": " + (typeof m === "string" ? m : JSON.stringify(m)) : "");
+};
 /* GPT-6 models take reasoning effort none/low/medium/high/xhigh/max. Klint's 5 levels map onto them; other models keep the old mapping. */
 const orIsGpt6 = () => /^openai\/gpt-6/i.test(orModel());
 const orEffort = () => orIsGpt6() ? ["none","low","medium","high","xhigh"][effort] : EFFORTS[effort].api;
 /* ordered list of reasoning settings to try for the live stream; null = send no reasoning field */
 function orReasoningAttempts(){
   const e = orEffort();
+  if(isHF()){ if(effort === 0) return [null]; const le = ["low","low","medium","high","high"][effort]; return [{effort:le}, null]; }   /* HF router: OpenAI-style reasoning_effort, dropped if the provider rejects it */
   if(!orIsGpt6()) return (e === "minimal") ? [null] : [{effort:e}, null];
   const out = [];
   if(e !== "none") out.push({effort:e, summary:"auto"}, {effort:e});
@@ -2661,15 +2673,29 @@ function orReasoningAttempts(){
 function orBody(history, system, stream, reasoning){
   const msgs = [{role: "system", content: system || buildSystem()}, ...history.map(m => ({role: m.role, content: (m.images && m.images.length) ? [{type: "text", text: m.content}, ...m.images.map(u => ({type: "image_url", image_url: {url: u}}))] : m.content}))];
   const b = {model: orModel(), messages: msgs, stream, max_tokens: orIsGpt6() ? 64000 : 32000};   /* reasoning tokens count toward max_tokens, so leave GPT-6 room for thinking AND a full file */
-  if(reasoning) b.reasoning = reasoning;
+  if(reasoning){ if(isHF()) b.reasoning_effort = reasoning.effort; else b.reasoning = reasoning; }
   return b;
 }
 async function orFetch(body, signal){
   let res;
-  try{ res = await fetch("https://openrouter.ai/api/v1/chat/completions", {method: "POST", signal, headers: {"Authorization": "Bearer " + orKey(), "Content-Type": "application/json", "HTTP-Referer": (location.origin && location.origin !== "null") ? location.origin : "https://klint.app", "X-Title": "Klint"}, body: JSON.stringify(body)}); }
-  catch(e){ if(e && e.name === "AbortError") throw e; throw new Error("Couldn't reach OpenRouter. Check your internet connection."); }
+  const url = isHF() ? "https://router.huggingface.co/v1/chat/completions" : "https://openrouter.ai/api/v1/chat/completions";
+  const headers = {"Authorization": "Bearer " + orKey(), "Content-Type": "application/json"};
+  if(!isHF()){ headers["HTTP-Referer"] = (location.origin && location.origin !== "null") ? location.origin : "https://klint.app"; headers["X-Title"] = "Klint"; }
+  try{ res = await fetch(url, {method: "POST", signal, headers, body: JSON.stringify(body)}); }
+  catch(e){ if(e && e.name === "AbortError") throw e; throw new Error("Couldn't reach " + apiName() + ". Check your internet connection."); }
   if(!res.ok){ let j = null; try{ j = await res.json(); }catch(_){} const e = new Error(orErr(res.status, j)); e.status = res.status; e.raw = j; throw e; }
   return res;
+}
+/* some providers send DeepSeek reasoning inline as <think>...</think> inside the content: split it into thought and answer, even when a tag is cut across chunks */
+function orSplitThink(tx, st){
+  let buf = (st.hold || "") + tx; st.hold = ""; let ans = "", th = "";
+  for(;;){
+    const tag = st.inT ? "</think>" : "<think>", i = buf.indexOf(tag);
+    if(i >= 0){ if(st.inT) th += buf.slice(0, i); else ans += buf.slice(0, i); buf = buf.slice(i + tag.length); st.inT = !st.inT; continue; }
+    let k = 0; for(let n = Math.min(tag.length - 1, buf.length); n > 0; n--){ if(tag.startsWith(buf.slice(buf.length - n))){ k = n; break; } }
+    if(st.inT) th += buf.slice(0, buf.length - k); else ans += buf.slice(0, buf.length - k); st.hold = buf.slice(buf.length - k); break;
+  }
+  return {ans, th};
 }
 const orTextOf = c => typeof c === "string" ? c : Array.isArray(c) ? c.map(x => (x && (x.text || x.content)) || "").join("") : "";
 /* pull readable reasoning text out of one streamed delta (plain "reasoning", "reasoning_content", or OpenRouter's reasoning_details summaries) */
@@ -2701,7 +2727,8 @@ async function orStream(history, onToken, system, onThought){
         const ch = (j.choices && j.choices[0]) || {}, dl = ch.delta || {};
         if(ch.finish_reason) fin = ch.finish_reason;
         const th = orThoughtOf(dl, tst); if(th && onThought){ thoughtSeen = true; onThought(th); }
-        const tx = orTextOf(dl.content) || (typeof dl.refusal === "string" ? dl.refusal : "") || orTextOf(ch.message && ch.message.content);
+        let tx = orTextOf(dl.content) || (typeof dl.refusal === "string" ? dl.refusal : "") || orTextOf(ch.message && ch.message.content);
+        if(tx && (tst.inT || tst.hold || tx.indexOf("<") >= 0)){ const sp = orSplitThink(tx, tst); tx = sp.ans; if(sp.th && onThought){ thoughtSeen = true; onThought(sp.th); } }
         if(tx){ got = true; onToken(tx); }
       };
       for(;;){
@@ -2711,6 +2738,7 @@ async function orStream(history, onToken, system, onThought){
         while((i = buf.indexOf("\n")) >= 0){ const line = buf.slice(0, i); buf = buf.slice(i + 1); handle(line); }
       }
       if(buf.trim()) handle(buf);   /* last line without a trailing newline */
+      if(tst.hold && !tst.inT){ got = true; onToken(tst.hold); tst.hold = ""; }   /* a stray "<" held back while waiting for a tag */
       if(abortFlag) return;
       if(got) return;
       /* the stream ended with no answer text (usually the model spent its whole budget thinking): retry cheaper */
@@ -2741,8 +2769,11 @@ async function orOnce(msgs, maxTok){
   }
   if(lastE) throw lastE; return "";
 }
+const hfPanel = () => `<div class="s-sec">Hugging Face</div>
+        <div class="srow col"><div><b>Access token</b><small>Create a fine-grained token at huggingface.co/settings/tokens with the "Make calls to Inference Providers" permission. It is stored only in this browser.</small></div><div style="display:flex;gap:8px;align-items:center"><input id="hfKey" class="tin" style="flex:1;min-height:0;height:38px" type="password" autocomplete="off" spellcheck="false" placeholder="hf_..." value="${esc(PREFS.get("hf_key", ""))}"><button type="button" class="btn" data-s="hf-show">Show</button></div></div>
+        <div class="srow col"><div><b>Model</b><small>Default is DeepSeek V4.1 Flash (${HF_DEFAULT}). Use any model id from huggingface.co that an Inference Provider serves. Add :fastest or :cheapest to the id to pick how the router chooses a provider.</small></div><input id="hfModel" class="tin" style="min-height:0;height:38px" type="text" spellcheck="false" placeholder="${HF_DEFAULT}" value="${esc(PREFS.get("hf_model", ""))}"></div>`;
 const orPanel = () => `<div class="s-sec">OpenRouter</div>
-        <div class="srow col"><div><b>API key</b><small>Get one at openrouter.ai/keys. It is stored only in this browser.</small></div><div style="display:flex;gap:8px;align-items:center"><input id="orKey" class="tin" style="flex:1;min-height:0;height:38px" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-v1-..." value="${esc(orKey())}"><button type="button" class="btn" data-s="or-show">Show</button></div></div>
+        <div class="srow col"><div><b>API key</b><small>Get one at openrouter.ai/keys. It is stored only in this browser.</small></div><div style="display:flex;gap:8px;align-items:center"><input id="orKey" class="tin" style="flex:1;min-height:0;height:38px" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-v1-..." value="${esc(PREFS.get("or_key", ""))}"><button type="button" class="btn" data-s="or-show">Show</button></div></div>
         <div class="srow col"><div><b>Model</b><small>Default is GPT-6 Luna (openai/gpt-6-luna). Any OpenRouter model id works.</small></div><input id="orModel" class="tin" style="min-height:0;height:38px" type="text" spellcheck="false" placeholder="${OR_DEFAULT}" value="${esc(PREFS.get("or_model", ""))}"></div>`;
 
 /* ============ LIVING UI PROMPT + GALLERY ============ */
@@ -2984,7 +3015,7 @@ const FAST_GEM = "gemini-3.5-flash-lite";   /* used for side tasks (titles, sugg
 const provider = () => PREFS.get("provider","openrouter");
 const gemKey = () => PREFS.get("gem_key","");
 const gemModel = () => PREFS.get("gem_model","gemini-3.5-flash-lite");
-const needsKey = () => (provider()==="gemini" && !gemKey()) || (provider()==="openrouter" && !orKey());
+const needsKey = () => (provider()==="gemini" && !gemKey()) || ((provider()==="openrouter" || provider()==="hf") && !orKey());
 function gemList(){
   let loaded = []; try{ loaded = JSON.parse(PREFS.get("gem_models","[]")) || []; }catch(_){}
   if(!loaded.length) return GEMINI_MODELS;
@@ -3115,7 +3146,7 @@ async function geminiOnce(msgs, model, maxTok){
 }
 /* one non-streaming call for the planner (side=false) and for titles and suggestions (side=true) */
 async function llmOnce(msgs, side){
-  if(provider()==="openrouter") return await orOnce(msgs);
+  if(provider()==="openrouter" || provider()==="hf") return await orOnce(msgs);
   if(provider()==="puter"){
     for(const model of [BASE_MODEL, FALLBACK_MODEL]){
       try{ const o = { stream:false }; if(model) o.model = model; const t = textOf(await puter.ai.chat(msgs, o)).trim(); if(t) return t; }catch(_){}
@@ -3236,7 +3267,7 @@ async function makePlan(history){
 
 /* ============ AI ============ */
 async function streamAI(history, onToken, system, onThought){
-  if(provider()==="openrouter") return orStream(history, onToken, system, onThought);
+  if(provider()==="openrouter" || provider()==="hf") return orStream(history, onToken, system, onThought);
   if(provider()==="gemini") return geminiStream(history, onToken, system, onThought);
   const hasImg = history.some(m=>m.images&&m.images.length);
   const msgs = [{role:"system", content:system || buildSystem()}, ...history.map(m=>({role:m.role, content: (m.images&&m.images.length) ? [{type:"text",text:m.content}, ...m.images.map(u=>({type:"image_url", image_url:{url:u}}))] : m.content}))];
@@ -3382,7 +3413,7 @@ async function respond(c){
         }
       }
     }
-    if(!full.trim()) throw new Error(provider()==="openrouter" ? "No response received from OpenRouter. Check your key and model in Settings." : provider()==="gemini" ? "No response received from Gemini. Check your key and model in Settings." : "No response received. Make sure Puter is reachable and sign in if prompted.");
+    if(!full.trim()) throw new Error(provider()==="openrouter" ? "No response received from OpenRouter. Check your key and model in Settings." : provider()==="hf" ? "No response received from Hugging Face. Check your token and model in Settings." : provider()==="gemini" ? "No response received from Gemini. Check your key and model in Settings." : "No response received. Make sure Puter is reachable and sign in if prompted.");
   }catch(e){
     let msg = (e && (e.message || e.error?.message || e.msg || (typeof e==="string"?e:""))) || "Something went wrong.";
     if(provider()==="puter" && /token|unauthori|401|not signed|sign.?in|auth/i.test(String((e&&(e.code||e.error&&e.error.code))||"")+" "+msg)) msg += " Open Settings, then Account, and sign in again.";
@@ -3980,9 +4011,9 @@ function authState(){
 }
 const needsSignIn = () => provider()==="puter" && authState() === false;
 function promptForKey(){
-  toast(provider()==="openrouter" ? "Add your OpenRouter API key in Settings to start" : "Add your Gemini API key in Settings to start", 4000);
+  toast(provider()==="openrouter" ? "Add your OpenRouter API key in Settings to start" : provider()==="hf" ? "Add your Hugging Face token in Settings to start" : "Add your Gemini API key in Settings to start", 4000);
   openSettings();
-  setTimeout(()=>{ const k = $("#orKey") || $("#gemKey"); if(k){ k.focus(); k.scrollIntoView({block:"center"}); } }, 80);
+  setTimeout(()=>{ const k = $("#orKey") || $("#hfKey") || $("#gemKey"); if(k){ k.focus(); k.scrollIntoView({block:"center"}); } }, 80);
 }
 function authHints(){
   const h = [];
@@ -4069,8 +4100,8 @@ function paintSettings(){
     model: head("Model", "Choose the brain and how hard it thinks.")
       + `<div class="grp">${row("Model",esc(TIERS[tier].desc),seg("tier",Object.entries(TIERS).map(([k,t])=>[k,t.name,t.icon]),tier))}${row("Effort",esc(EFFORTS[effort].desc),seg("effort",EFFORTS.map((e,i)=>[String(i),e.name]),String(effort)))}</div>`,
     engine: head("AI engine", "Where the replies come from.")
-      + `<div class="grp">${row("Provider",prov==="openrouter" ? "OpenRouter key, GPT-6 Luna by default" : prov==="gemini" ? "Your own Gemini API key, billed by Google" : "Puter account (user pays), no key needed",seg("provider",[["openrouter","OpenRouter"],["gemini","Gemini API"],["puter","Puter"]],prov))}</div>`
-      + (prov==="openrouter" ? orPanel() : prov==="gemini" ? geminiPanel() : `<div class="s-sec">Puter account</div><div class="acct-box" id="acctBox"></div>`),
+      + `<div class="grp">${row("Provider",prov==="openrouter" ? "OpenRouter key, GPT-6 Luna by default" : prov==="hf" ? "Hugging Face token, DeepSeek V4.1 Flash by default" : prov==="gemini" ? "Your own Gemini API key, billed by Google" : "Puter account (user pays), no key needed",seg("provider",[["hf","Hugging Face"],["openrouter","OpenRouter"],["gemini","Gemini API"],["puter","Puter"]],prov))}</div>`
+      + (prov==="openrouter" ? orPanel() : prov==="hf" ? hfPanel() : prov==="gemini" ? geminiPanel() : `<div class="s-sec">Puter account</div><div class="acct-box" id="acctBox"></div>`),
     kx: head("Living UI", "Interactive charts, forms, maps and more, right inside answers.") + kxPanel(),
     data: head("Data", "Your chats live on this device only.")
       + `<div class="grp">${row("Chats",chats.length+" saved on this device",`<button type="button" class="btn danger" data-s="clear">${SVG("trash")}Clear all</button>`)}${row("New chat","Start a fresh conversation",`<kbd><span>Ctrl</span><span>N</span></kbd>`)}${row("Keyboard shortcuts","See everything you can do from the keyboard",`<button type="button" class="btn" data-s="shortcuts">${SVG("keys")}Show</button>`)}</div>`
@@ -4088,7 +4119,7 @@ function openSettings(){
   if(!m){
     m = document.createElement("div"); m.id = "settings"; m.className = "modal";
     document.body.appendChild(m);
-    m.addEventListener("input", e=>{ if(e.target && e.target.id==="orKey") PREFS.set("or_key", e.target.value.trim()); else if(e.target && e.target.id==="orModel") PREFS.set("or_model", e.target.value.trim()); else if(e.target && e.target.id==="gemKey"){ PREFS.set("gem_key", e.target.value.trim()); scheduleGemCheck(); } else if(e.target && e.target.id==="customIns") PREFS.set("custom", e.target.value.slice(0,1500)); });
+    m.addEventListener("input", e=>{ if(e.target && e.target.id==="orKey") PREFS.set("or_key", e.target.value.trim()); else if(e.target && e.target.id==="orModel") PREFS.set("or_model", e.target.value.trim()); else if(e.target && e.target.id==="hfKey") PREFS.set("hf_key", e.target.value.trim()); else if(e.target && e.target.id==="hfModel") PREFS.set("hf_model", e.target.value.trim()); else if(e.target && e.target.id==="gemKey"){ PREFS.set("gem_key", e.target.value.trim()); scheduleGemCheck(); } else if(e.target && e.target.id==="customIns") PREFS.set("custom", e.target.value.slice(0,1500)); });
     m.addEventListener("change", e=>{ if(e.target && e.target.id==="gemModel"){ PREFS.set("gem_model", e.target.value); toast("Model: "+e.target.value); paintSettings(); scheduleGemCheck(); } });
     m.addEventListener("click", async e=>{
       if(e.target===m) return closeSettings();
@@ -4109,7 +4140,7 @@ function openSettings(){
       else if(a==="stab"){ window.__kxTab = b.dataset.t; paintSettings(); }
       else if(a==="kxtry"){ closeSettings(); if(busy) return toast("Wait for the reply to finish"); submit(KX_DOC[+b.dataset.i][3]); }
       else if(a==="shortcuts"){ closeSettings(); openShortcuts(); }
-      else if(a==="or-show"){ const k = $("#orKey"); if(k){ const show = k.type==="password"; k.type = show ? "text" : "password"; b.textContent = show ? "Hide" : "Show"; } }
+      else if(a==="or-show" || a==="hf-show"){ const k = $(a==="hf-show" ? "#hfKey" : "#orKey"); if(k){ const show = k.type==="password"; k.type = show ? "text" : "password"; b.textContent = show ? "Hide" : "Show"; } }
       else if(a==="gem-show"){ const k = $("#gemKey"); if(k){ const show = k.type==="password"; k.type = show ? "text" : "password"; b.textContent = show ? "Hide" : "Show"; } }
       else if(a==="gem-test") geminiTest();
       else if(a==="gem-load") gemLoadModels();
@@ -4132,6 +4163,7 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSettings(); 
 $("#settingsBtn").onclick = openSettings;
 applyTheme(); applyFs();
 if(PREFS.get("or_mig","")!=="1"){ PREFS.set("provider","openrouter"); PREFS.set("or_mig","1"); }
+if(PREFS.get("hf_mig","")!=="1"){ PREFS.set("provider","hf"); PREFS.set("hf_mig","1"); }   /* one-time: Hugging Face (DeepSeek V4.1 Flash) becomes the active provider */
 if(PREFS.get("or_mig2","")!=="luna"){ const m = (PREFS.get("or_model","")||"").trim(); if(!m || /claude-haiku/i.test(m)) PREFS.set("or_model",""); PREFS.set("or_mig2","luna"); }   /* one-time switch to GPT-6 Luna; a custom model id you typed is kept */
 if(PREFS.get("gem_mig","")!=="35fl"){ PREFS.set("gem_model","gemini-3.5-flash-lite"); PREFS.set("gem_mig","35fl"); }   /* one-time switch to Gemini 3.5 Flash-Lite (Budget) */
 paintGemStat(); if(provider()==="gemini" && gemKey()) checkGemKey();
