@@ -4,6 +4,7 @@
 <script>try{var _t=localStorage.getItem("klint_theme")||"dark";if(_t==="system")_t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";document.documentElement.dataset.theme=_t;document.documentElement.dataset.fs=localStorage.getItem("klint_fs")||"m"}catch(e){}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;650;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <title>Klint</title>
 <script src="https://js.puter.com/v2/"></script>
 <style>
@@ -1043,6 +1044,79 @@ html.kx-boot .nav,html.kx-boot .newchat,html.kx-boot .hsearch{animation:kxNav .8
 .kxg i{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent2);flex:none}.kxg i svg{width:14px;height:14px}
 .kxg-h{padding:4px 2px 10px;color:var(--muted);font-size:13px}
 
+/* ===== MODERN TYPE + THINKING PANEL + SETTINGS ===== */
+body{font-family:"Inter Variable","Inter",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-feature-settings:"cv11","ss03","calt";letter-spacing:-.011em;font-optical-sizing:auto}
+.md code.in,.code pre,.code code,.kx-code,.kx-spec,.kx-outp{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Consolas,monospace!important;font-feature-settings:"calt","liga"}
+.md p{line-height:1.7}.md h1,.md h2,.md h3,.md h4{letter-spacing:-.022em}
+/* live thinking card */
+.act{max-width:620px;border-radius:22px;border:1px solid color-mix(in srgb,var(--line2) 65%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--card) 90%,#fff 5%) 0,var(--card) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 24px 60px -30px rgba(0,0,0,.7),0 2px 6px rgba(0,0,0,.18);margin:4px 0 14px}
+.act::before{height:2px;background:linear-gradient(90deg,transparent,var(--ec),#a78bfa,transparent) no-repeat;background-size:40% 100%;opacity:.9}
+.act-h{padding:15px 18px;gap:12px}
+.act-h::before{content:"";width:22px;height:22px;border-radius:50%;flex:none;background:conic-gradient(from 0deg,var(--ec),#a78bfa,#f472b6,var(--ec));-webkit-mask:radial-gradient(circle,transparent 5.5px,#000 6.5px);mask:radial-gradient(circle,transparent 5.5px,#000 6.5px);animation:actspin 1.6s linear infinite}
+.act.fin .act-h::before{animation:none;background:var(--ok,#30d158);-webkit-mask:none;mask:none;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/18px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/18px no-repeat}
+.act-h .status{font-size:14.5px;font-weight:560;letter-spacing:-.016em;color:var(--text)}
+.act:not(.fin) .act-h .status{background:linear-gradient(100deg,var(--text) 30%,color-mix(in srgb,var(--text) 35%,transparent) 50%,var(--text) 70%);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:kxShim2 2.4s linear infinite}
+@keyframes kxShim2{from{background-position:130% 0}to{background-position:-130% 0}}
+.act-t{padding:3px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--line);font:500 11.5px "JetBrains Mono",ui-monospace,monospace;color:var(--muted)}
+.act-d{display:none}
+.act-c{width:16px!important;height:16px!important}
+.act-in{padding:6px 18px 18px;gap:18px}
+.act.open .act-bi{border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.act-steps,.rs-steps{gap:2px;position:relative}
+.g{padding:7px 2px;font-size:13.5px;gap:12px;letter-spacing:-.01em}
+.g.active{color:var(--text)}.g.done{color:var(--muted)}
+.act-lbl{font-size:11px;letter-spacing:.09em;color:var(--dim);margin-bottom:9px}
+.act-tx{font-size:13.5px;line-height:1.78;color:color-mix(in srgb,var(--text) 68%,var(--muted));padding:2px 0 2px 16px;border-left:2px solid transparent;border-image:linear-gradient(180deg,var(--ec),color-mix(in srgb,var(--ec) 8%,transparent)) 1;max-height:230px;-webkit-mask-image:linear-gradient(transparent 0,#000 14px,#000 calc(100% - 22px),transparent 100%);mask-image:linear-gradient(transparent 0,#000 14px,#000 calc(100% - 22px),transparent 100%);scrollbar-width:none}
+.act-tx::-webkit-scrollbar{display:none}
+.act-tx strong{color:var(--text);font-weight:600}
+.act:not(.fin) .act-think .act-tx::after{width:2px;height:15px;margin-left:2px;border-radius:2px;vertical-align:-3px;background:linear-gradient(var(--ec),#a78bfa);animation:blink 1s steps(2) infinite}
+/* finished "Thought for Xs" chip */
+.rsn{margin:2px 0 12px}
+.rsn-h{padding:7px 13px 7px 11px;gap:9px;font-size:13px;font-weight:520;background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.rsn-h::before{content:"";width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--ec,#a58bff),#a78bfa);box-shadow:0 0 0 3px color-mix(in srgb,var(--ec,#a58bff) 20%,transparent)}
+.rsn-b{margin:10px 0 2px 4px;padding:2px 0 2px 16px;font-size:13.5px;line-height:1.78;color:color-mix(in srgb,var(--text) 68%,var(--muted));border-left:2px solid transparent;border-image:linear-gradient(180deg,var(--ec,#a58bff),color-mix(in srgb,var(--ec,#a58bff) 8%,transparent)) 1}
+/* ===== SETTINGS ===== */
+.modal{-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);background:rgba(0,0,0,.45)}
+.modal-card.set{max-width:900px;height:min(86vh,660px);max-height:none;flex-direction:row;border-radius:24px;background:color-mix(in srgb,var(--panel) 96%,transparent);border:1px solid color-mix(in srgb,var(--line2) 70%,transparent);box-shadow:0 40px 120px -20px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.05)}
+.set-nav{width:226px;flex:none;padding:20px 12px 14px;display:flex;flex-direction:column;gap:3px;border-right:1px solid var(--line);background:color-mix(in srgb,var(--bg) 60%,var(--panel))}
+.set-t{font-size:21px;font-weight:650;letter-spacing:-.03em;padding:2px 11px 16px}
+.set-i{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:var(--muted);font-size:14.2px;font-weight:500;text-align:left;transition:background .18s,color .18s}
+.set-i svg{width:18px;height:18px;flex:none;opacity:.85}
+.set-i:hover{background:var(--card);color:var(--text)}
+.set-i.on{background:var(--card2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}.set-i.on svg{color:var(--accent2);opacity:1}
+.set-foot{margin-top:auto;padding:10px 12px 2px;font-size:11.5px;line-height:1.5;color:var(--dim)}
+.set-main{flex:1;min-width:0;overflow:auto;padding:28px 32px 36px;scroll-behavior:smooth}
+.set-main h2{font-size:26px;font-weight:650;letter-spacing:-.03em;margin:0 0 4px;line-height:1.2}
+.set-sub{color:var(--muted);font-size:13.5px;margin:0 0 20px}
+.set-x{position:absolute;top:16px;right:16px;z-index:3;width:34px;height:34px;border-radius:50%;background:var(--card)}
+.grp{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:2px 18px;margin-bottom:14px}
+.grp .srow{padding:15px 0;gap:16px}
+.set-main>.srow{background:var(--card);border:1px solid var(--line)!important;border-radius:18px;padding:15px 18px;margin-bottom:12px}
+.set-main .srow b{font-size:14.5px;font-weight:600;letter-spacing:-.012em}
+.set-main .srow small{font-size:13px;margin-top:2px;line-height:1.45}
+.set-main .s-sec{margin:26px 4px 10px;padding:0;font-size:12px;letter-spacing:.08em}
+.set-main .seg{background:var(--bg);border-radius:12px;padding:3px}
+.set-main .segb{padding:7px 13px;border-radius:9px}
+.set-main .segb.on{background:var(--card2);box-shadow:0 1px 3px rgba(0,0,0,.28),inset 0 0 0 1px var(--line)}
+.set-main .tin{background:var(--bg);border:1px solid var(--line2);border-radius:12px;padding:10px 13px;color:var(--text);font:inherit;font-size:13.5px;width:100%;outline:none;transition:border-color .15s,box-shadow .15s;min-height:90px;resize:vertical}
+.set-main .tin:focus{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 20%,transparent)}
+.set-main .btn{border-radius:12px;padding:9px 15px;border:1px solid var(--line2);background:var(--card2)}
+.set-main .btn.danger{background:color-mix(in srgb,#e5484d 12%,transparent);border-color:color-mix(in srgb,#e5484d 35%,transparent)}
+.tgl{width:48px;height:29px;border-radius:99px;background:var(--line2);position:relative;transition:background .25s;flex:none;border:0}
+.tgl i{position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.35);transition:transform .32s cubic-bezier(.3,1.4,.5,1)}
+.tgl.on{background:var(--ok,#30d158)}.tgl.on i{transform:translateX(19px)}
+.set-main .acct-box{background:var(--bg);border-radius:16px}
+.set-main .kxg{padding-top:2px}
+@media(max-width:720px){
+  .modal{padding:0;align-items:flex-end}
+  .modal-card.set{flex-direction:column;height:92vh;max-width:none;border-radius:24px 24px 0 0}
+  .set-nav{width:auto;flex-direction:row;overflow-x:auto;padding:14px 12px 10px;border-right:0;border-bottom:1px solid var(--line);gap:4px;scrollbar-width:none}
+  .set-t,.set-foot{display:none}
+  .set-i{padding:8px 13px;white-space:nowrap;flex:none}
+  .set-main{padding:20px 18px 28px}
+  .set-x{top:12px;right:12px}
+}
+
 </style>
 </head>
 <body>
@@ -1562,12 +1636,20 @@ Mode focus: UI and motion. Deliver an interactive prototype, not a still. Define
 code: `
 Mode focus: code. Use the language the user names. Deliver runnable code with entry point, imports, input validation and meaningful errors, plus a few tests or example calls with expected output and one line on how to run it. For bugs: root cause, minimal fix, why it works, how to verify. Never rewrite unrelated code.`
 };
+const GPT_HINT = `
+
+# Engine notes (GPT-6 Luna)
+- Treat the system instructions as binding. Think privately, then output only the final answer in the required format.
+- Living UI blocks: write the fence exactly as three backticks followed by the block name (for example ui-chart), then ONE valid JSON object with double quotes, no comments, no trailing commas, then closing backticks. Never wrap a block in another code fence and never add prose inside it.
+- Code: always return complete files or exact patch blocks in the required format. Never truncate, never use placeholders like "rest of code here".
+- Keep prose short and plain: no preamble, no restating the request.`;
+const oaExtras = () => (provider()==="openrouter" && /^openai\//i.test(PREFS.get("or_model","") || OR_DEFAULT)) ? GPT_HINT : "";
 const gemExtras = () => provider()==="gemini" ? GEM_BASE_HINT + (GEM_MODE[pbOf()]||"") : "";
 const buildSystemFull = plan => {
   const tail = "\n\n# Effort level: " + EFFORTS[effort].name + "\n" + EFFORTS[effort].hint
     + (plan ? "\n\n# Private plan from your planning stage (never mention or reveal it; follow it and fix anything it flags)\n" + plan.slice(0,3500) : "");
-  if(REQ.lean) return EDIT_SYS + (REQ.gui ? GUI_HINT : "") + TIERS[tier].hint + plHintsFor() + (provider()==="gemini" ? GEM_BASE_HINT : "") + customBlock() + editBlock() + tail;
-  return KLINT_SYSTEM + (MODES[pbOf()].hint||"") + TIERS[tier].hint + plHintsFor() + extrasFor(pbOf()) + gemExtras() + kxHint() + customBlock() + editBlock() + tail;
+  if(REQ.lean) return EDIT_SYS + (REQ.gui ? GUI_HINT : "") + TIERS[tier].hint + plHintsFor() + (provider()==="gemini" ? GEM_BASE_HINT : "") + oaExtras() + customBlock() + editBlock() + tail;
+  return KLINT_SYSTEM + (MODES[pbOf()].hint||"") + TIERS[tier].hint + plHintsFor() + extrasFor(pbOf()) + gemExtras() + oaExtras() + kxHint() + customBlock() + editBlock() + tail;
 };
 const buildSystem = plan => Budget.slimNow() ? Budget.compactSystem(plan) : buildSystemFull(plan);
 function renderHome(){
@@ -2558,15 +2640,28 @@ def("run", {icon: "code", label: "Try it", persist: false,
 return {has: l => /^ui-/.test(l) && !!DEFS[l.slice(3)], render, names: () => Object.keys(DEFS), defs: DEFS};
 })();
 
-/* ============ OPENROUTER (Claude Haiku 5.5) ============ */
-const OR_DEFAULT = "anthropic/claude-haiku-5.5";
+/* ============ OPENROUTER (GPT-6 Luna) ============ */
+const OR_DEFAULT = "openai/gpt-6-luna";
 const orKey = () => PREFS.get("or_key", "").trim();
 const orModel = () => (PREFS.get("or_model", "") || OR_DEFAULT).trim();
 const orErr = (st, j) => { const m = (j && j.error && (j.error.message || j.error)) || ""; return st === 401 ? "OpenRouter rejected your API key. Check it in Settings." : st === 402 ? "Your OpenRouter account is out of credits. Add credits at openrouter.ai/credits." : st === 429 ? "OpenRouter rate limit reached. Wait a moment and retry." : st === 404 ? "Model not found on OpenRouter: " + orModel() : "OpenRouter error" + (st ? " (" + st + ")" : "") + (m ? ": " + (typeof m === "string" ? m : JSON.stringify(m)) : ""); };
+/* GPT-6 models take reasoning effort none/low/medium/high/xhigh/max. Klint's 5 levels map onto them; other models keep the old mapping. */
+const orIsGpt6 = () => /^openai\/gpt-6/i.test(orModel());
+const orEffort = () => orIsGpt6() ? ["none","low","medium","high","xhigh"][effort] : EFFORTS[effort].api;
+/* ordered list of reasoning settings to try for the live stream; null = send no reasoning field */
+function orReasoningAttempts(){
+  const e = orEffort();
+  if(!orIsGpt6()) return (e === "minimal") ? [null] : [{effort:e}, null];
+  const out = [];
+  if(e !== "none") out.push({effort:e, summary:"auto"}, {effort:e});
+  if(e !== "low" && e !== "none") out.push({effort:"low"});   /* retry cheaper if thinking used up the whole budget */
+  out.push({effort:"none"});
+  return out;
+}
 function orBody(history, system, stream, reasoning){
   const msgs = [{role: "system", content: system || buildSystem()}, ...history.map(m => ({role: m.role, content: (m.images && m.images.length) ? [{type: "text", text: m.content}, ...m.images.map(u => ({type: "image_url", image_url: {url: u}}))] : m.content}))];
-  const b = {model: orModel(), messages: msgs, stream, max_tokens: 32000};
-  if(reasoning) b.reasoning = {effort: EFFORTS[effort].api};
+  const b = {model: orModel(), messages: msgs, stream, max_tokens: orIsGpt6() ? 64000 : 32000};   /* reasoning tokens count toward max_tokens, so leave GPT-6 room for thinking AND a full file */
+  if(reasoning) b.reasoning = reasoning;
   return b;
 }
 async function orFetch(body, signal){
@@ -2576,43 +2671,79 @@ async function orFetch(body, signal){
   if(!res.ok){ let j = null; try{ j = await res.json(); }catch(_){} const e = new Error(orErr(res.status, j)); e.status = res.status; e.raw = j; throw e; }
   return res;
 }
+const orTextOf = c => typeof c === "string" ? c : Array.isArray(c) ? c.map(x => (x && (x.text || x.content)) || "").join("") : "";
+/* pull readable reasoning text out of one streamed delta (plain "reasoning", "reasoning_content", or OpenRouter's reasoning_details summaries) */
+function orThoughtOf(dl, st){
+  if(typeof dl.reasoning === "string" && dl.reasoning) return dl.reasoning;
+  if(typeof dl.reasoning_content === "string" && dl.reasoning_content) return dl.reasoning_content;
+  const det = dl.reasoning_details; if(!Array.isArray(det)) return "";
+  let out = "";
+  for(const d of det){
+    if(!d || /encrypted/i.test(d.type || "")) continue;
+    const t = typeof d.text === "string" && d.text ? d.text : (typeof d.summary === "string" ? d.summary : ""); if(!t) continue;
+    const key = String(d.id != null ? d.id : (d.index != null ? d.index : ""));
+    if(st.rid !== undefined && key !== st.rid && st.any) out += "\n\n";   /* new summary part: keep the **headings** on their own line so the live status can read them */
+    st.rid = key; st.any = true; out += t;
+  }
+  return out;
+}
 async function orStream(history, onToken, system, onThought){
-  for(const withR of [true, false]){
-    const ctl = new AbortController(), watch = setInterval(() => { if(abortFlag) ctl.abort(); }, 120); let got = false;
+  const tries = orReasoningAttempts(); let lastFin = "";
+  for(let ti = 0; ti < tries.length; ti++){
+    const ctl = new AbortController(), watch = setInterval(() => { if(abortFlag) ctl.abort(); }, 120); let got = false, thoughtSeen = false, fin = ""; const tst = {};
     try{
-      const res = await orFetch(orBody(history, system, true, withR && EFFORTS[effort].api !== "minimal"), ctl.signal);
+      const res = await orFetch(orBody(history, system, true, tries[ti]), ctl.signal);
       const rd = res.body.getReader(), dec = new TextDecoder(); let buf = "";
+      const handle = line => {
+        line = line.trim(); if(!line.startsWith("data:")) return; const d = line.slice(5).trim(); if(!d || d === "[DONE]") return;
+        let j; try{ j = JSON.parse(d); }catch(_){ return; }
+        if(j.error){ const e = new Error(orErr(j.error.code || 0, j)); e.status = j.error.code; throw e; }
+        const ch = (j.choices && j.choices[0]) || {}, dl = ch.delta || {};
+        if(ch.finish_reason) fin = ch.finish_reason;
+        const th = orThoughtOf(dl, tst); if(th && onThought){ thoughtSeen = true; onThought(th); }
+        const tx = orTextOf(dl.content) || (typeof dl.refusal === "string" ? dl.refusal : "") || orTextOf(ch.message && ch.message.content);
+        if(tx){ got = true; onToken(tx); }
+      };
       for(;;){
         const {done, value} = await rd.read(); if(done) break;
         if(abortFlag){ try{ rd.cancel(); }catch(_){} break; }
         buf += dec.decode(value, {stream: true}); let i;
-        while((i = buf.indexOf("\n")) >= 0){
-          const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
-          if(!line.startsWith("data:")) continue; const d = line.slice(5).trim(); if(d === "[DONE]") continue;
-          let j; try{ j = JSON.parse(d); }catch(_){ continue; }
-          if(j.error){ const e = new Error(orErr(j.error.code || 0, j)); e.status = j.error.code; throw e; }
-          const dl = (j.choices && j.choices[0] && j.choices[0].delta) || {};
-          if(dl.reasoning && onThought) onThought(dl.reasoning);
-          if(dl.content){ got = true; onToken(dl.content); }
-        }
+        while((i = buf.indexOf("\n")) >= 0){ const line = buf.slice(0, i); buf = buf.slice(i + 1); handle(line); }
       }
-      return;
+      if(buf.trim()) handle(buf);   /* last line without a trailing newline */
+      if(abortFlag) return;
+      if(got) return;
+      /* the stream ended with no answer text (usually the model spent its whole budget thinking): retry cheaper */
+      lastFin = fin || lastFin;
+      if(ti < tries.length - 1) continue;
+      break;
     }catch(e){
       if(abortFlag || (e && e.name === "AbortError")) return;
-      if(!got && withR && e.status === 400 && /reason|effort|thinking/i.test(e.message + JSON.stringify(e.raw || ""))) continue;
+      /* the model or route rejected the reasoning settings: retry with a simpler setting, finally with none */
+      if(!got && !thoughtSeen && ti < tries.length - 1 && (e.status === 400 || e.status === 422)) continue;
       throw e;
     }finally{ clearInterval(watch); }
   }
+  throw new Error(lastFin === "length" ? "The model ran out of tokens while thinking. Lower the Effort level or shorten the request." : lastFin === "content_filter" ? "OpenRouter's provider blocked this reply. Try rewording the request." : "The model finished without writing an answer, even after retrying with less thinking. Try again, or lower the Effort level.");
 }
-async function orOnce(msgs){
-  for(const withR of [false]){
-    const res = await orFetch({model: orModel(), messages: msgs, stream: false, max_tokens: 4000});
-    const j = await res.json(); return ((j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || "").trim();
+async function orOnce(msgs, maxTok){
+  const lim = maxTok || (orIsGpt6() ? 12000 : 4000);
+  const tries = orIsGpt6() ? [{effort:"low"}, null] : [null];   /* side tasks need little thinking; low keeps GPT-6 from burning the budget before it answers */
+  let lastE = null;
+  for(const r of tries){
+    try{
+      const body = {model: orModel(), messages: msgs, stream: false, max_tokens: lim}; if(r) body.reasoning = r;
+      const res = await orFetch(body);
+      const j = await res.json(); const c = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+      const t = (typeof c === "string" ? c : Array.isArray(c) ? c.map(x => (x && x.text) || "").join("") : "").trim();
+      if(t || r === null) return t;
+    }catch(e){ lastE = e; if(!(e && (e.status === 400 || e.status === 422)) || r === null) throw e; }
   }
+  if(lastE) throw lastE; return "";
 }
 const orPanel = () => `<div class="s-sec">OpenRouter</div>
         <div class="srow col"><div><b>API key</b><small>Get one at openrouter.ai/keys. It is stored only in this browser.</small></div><div style="display:flex;gap:8px;align-items:center"><input id="orKey" class="tin" style="flex:1;min-height:0;height:38px" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-v1-..." value="${esc(orKey())}"><button type="button" class="btn" data-s="or-show">Show</button></div></div>
-        <div class="srow col"><div><b>Model</b><small>Default is Claude Haiku 5.5. Any OpenRouter model id works.</small></div><input id="orModel" class="tin" style="min-height:0;height:38px" type="text" spellcheck="false" placeholder="${OR_DEFAULT}" value="${esc(PREFS.get("or_model", ""))}"></div>`;
+        <div class="srow col"><div><b>Model</b><small>Default is GPT-6 Luna (openai/gpt-6-luna). Any OpenRouter model id works.</small></div><input id="orModel" class="tin" style="min-height:0;height:38px" type="text" spellcheck="false" placeholder="${OR_DEFAULT}" value="${esc(PREFS.get("or_model", ""))}"></div>`;
 
 /* ============ LIVING UI PROMPT + GALLERY ============ */
 const KX_DOC = [
@@ -3924,30 +4055,33 @@ function paintAccount(){
 const seg = (key, opts, cur) => `<div class="seg" role="group">${opts.map(o=>`<button type="button" class="segb ${o[0]===cur?"on":""}" data-s="set" data-key="${key}" data-val="${o[0]}">${o[2]?SVG(o[2]):""}${o[1]}</button>`).join("")}</div>`;
 function paintSettings(){
   const m = $("#settings"); if(!m) return;
-  const keep = m.querySelector(".m-body") ? m.querySelector(".m-body").scrollTop : 0;
-  m.innerHTML = `
-    <div class="modal-card" role="dialog" aria-modal="true" aria-label="Settings">
-      <div class="m-head"><b>Settings</b><button type="button" class="icon-btn" data-s="close" title="Close" aria-label="Close settings">${SVG("x")}</button></div>
-      <div class="m-body">
-        ${kxTabs()}${(window.__kxTab||"general")==="kx" ? kxPanel() : `
-        <div class="s-sec">General</div>
-        <div class="srow"><div><b>Appearance</b><small>Dark, light, or match your device</small></div>${seg("theme",[["dark","Dark","moon"],["light","Light","sun"],["system","Auto","monitor"]],PREFS.get("theme","dark"))}</div>
-        <div class="srow"><div><b>Text size</b><small>Chat and interface text</small></div>${seg("fs",[["s","Small"],["m","Default"],["l","Large"]],PREFS.get("fs","m"))}</div>
-        <div class="srow"><div><b>Model</b><small>${esc(TIERS[tier].desc)}</small></div>${seg("tier",Object.entries(TIERS).map(([k,t])=>[k,t.name,t.icon]),tier)}</div>
-        <div class="srow"><div><b>Effort</b><small>${esc(EFFORTS[effort].desc)}</small></div>${seg("effort",EFFORTS.map((e,i)=>[String(i),e.name]),String(effort))}</div>
-        <div class="srow"><div><b>Smart suggestions</b><small>Follow-up chips and AI chat titles after replies</small></div>${seg("smart",[["on","On"],["off","Off"]],PREFS.get("smart","on"))}</div>
-        <div class="srow col"><div><b>Custom instructions</b><small>Tell Klint how you like answers, your tech stack or design taste. Applied to every chat.</small></div><textarea id="customIns" class="tin" rows="3" maxlength="1500" placeholder="e.g. I use vanilla JS. I like dark, minimal designs. Keep explanations short.">${esc(PREFS.get("custom",""))}</textarea></div>
-        <div class="s-sec">AI engine</div>
-        <div class="srow"><div><b>Provider</b><small>${provider()==="openrouter" ? "OpenRouter key, Claude Haiku 5.5 by default" : provider()==="gemini" ? "Your own Gemini API key, billed by Google" : "Puter account (user pays), no key needed"}</small></div>${seg("provider",[["openrouter","OpenRouter"],["gemini","Gemini API"],["puter","Puter"]],provider())}</div>
-        ${provider()==="openrouter" ? orPanel() : provider()==="gemini" ? geminiPanel() : `<div class="s-sec">Puter account</div><div class="acct-box" id="acctBox"></div>`}
-        <div class="s-sec">Data and shortcuts</div>
-        <div class="srow"><div><b>Chats</b><small>${chats.length} saved on this device</small></div><button type="button" class="btn danger" data-s="clear">${SVG("trash")}Clear all</button></div>
-        <div class="srow"><div><b>New chat</b><small>Start a fresh conversation</small></div><kbd><span>Ctrl</span><span>N</span></kbd></div>`}
-      </div>
-    </div>`;
-  m.querySelector(".m-body").scrollTop = keep;
+  const keep = m.querySelector(".set-main") ? m.querySelector(".set-main").scrollTop : 0;
+  const tab = window.__kxTab || "general";
+  const NAV = [["general","General","gear"],["model","Model","spark"],["engine","AI engine","bolt"],["kx","Living UI","layout"],["data","Data","down"]];
+  const sw = (key, on) => `<button type="button" class="tgl ${on?"on":""}" role="switch" aria-checked="${on}" aria-label="${key}" data-s="set" data-key="${key}" data-val="${on?"off":"on"}"><i></i></button>`;
+  const row = (t, d, c) => `<div class="srow"><div><b>${t}</b><small>${d}</small></div>${c}</div>`;
+  const head = (t, d) => `<h2>${t}</h2><p class="set-sub">${d}</p>`;
+  const prov = provider();
+  const pages = {
+    general: head("General", "Look, feel and how Klint talks to you.")
+      + `<div class="grp">${row("Appearance","Dark, light, or match your device",seg("theme",[["dark","Dark","moon"],["light","Light","sun"],["system","Auto","monitor"]],PREFS.get("theme","dark")))}${row("Text size","Chat and interface text",seg("fs",[["s","Small"],["m","Default"],["l","Large"]],PREFS.get("fs","m")))}${row("Smart suggestions","Follow-up chips and AI chat titles after replies",sw("smart",PREFS.get("smart","on")==="on"))}</div>`
+      + `<div class="s-sec">Custom instructions</div><div class="grp" style="padding:16px 18px"><small style="display:block;color:var(--muted);margin-bottom:10px;font-size:13px">Tell Klint how you like answers, your tech stack or design taste. Applied to every chat.</small><textarea id="customIns" class="tin" rows="4" maxlength="1500" placeholder="e.g. I use vanilla JS. I like dark, minimal designs. Keep explanations short.">${esc(PREFS.get("custom",""))}</textarea></div>`,
+    model: head("Model", "Choose the brain and how hard it thinks.")
+      + `<div class="grp">${row("Model",esc(TIERS[tier].desc),seg("tier",Object.entries(TIERS).map(([k,t])=>[k,t.name,t.icon]),tier))}${row("Effort",esc(EFFORTS[effort].desc),seg("effort",EFFORTS.map((e,i)=>[String(i),e.name]),String(effort)))}</div>`,
+    engine: head("AI engine", "Where the replies come from.")
+      + `<div class="grp">${row("Provider",prov==="openrouter" ? "OpenRouter key, GPT-6 Luna by default" : prov==="gemini" ? "Your own Gemini API key, billed by Google" : "Puter account (user pays), no key needed",seg("provider",[["openrouter","OpenRouter"],["gemini","Gemini API"],["puter","Puter"]],prov))}</div>`
+      + (prov==="openrouter" ? orPanel() : prov==="gemini" ? geminiPanel() : `<div class="s-sec">Puter account</div><div class="acct-box" id="acctBox"></div>`),
+    kx: head("Living UI", "Interactive charts, forms, maps and more, right inside answers.") + kxPanel(),
+    data: head("Data", "Your chats live on this device only.")
+      + `<div class="grp">${row("Chats",chats.length+" saved on this device",`<button type="button" class="btn danger" data-s="clear">${SVG("trash")}Clear all</button>`)}${row("New chat","Start a fresh conversation",`<kbd><span>Ctrl</span><span>N</span></kbd>`)}${row("Keyboard shortcuts","See everything you can do from the keyboard",`<button type="button" class="btn" data-s="shortcuts">${SVG("keys")}Show</button>`)}</div>`
+  };
+  m.innerHTML = `<div class="modal-card set" role="dialog" aria-modal="true" aria-label="Settings">
+    <nav class="set-nav" aria-label="Settings sections"><div class="set-t">Settings</div>${NAV.map(n=>`<button type="button" class="set-i ${n[0]===tab?"on":""}" data-s="stab" data-t="${n[0]}">${SVG(n[2])}<span>${n[1]}</span></button>`).join("")}<div class="set-foot">Klint &middot; Taskbound</div></nav>
+    <div class="set-main"><button type="button" class="icon-btn set-x" data-s="close" title="Close" aria-label="Close settings">${SVG("x")}</button>${pages[tab]||pages.general}</div></div>`;
+  m.querySelector(".set-main").scrollTop = keep;
   paintAccount(); paintGemStat();
 }
+
 function openSettings(){
   closeMenus();
   let m = $("#settings");
@@ -3974,6 +4108,7 @@ function openSettings(){
       }
       else if(a==="stab"){ window.__kxTab = b.dataset.t; paintSettings(); }
       else if(a==="kxtry"){ closeSettings(); if(busy) return toast("Wait for the reply to finish"); submit(KX_DOC[+b.dataset.i][3]); }
+      else if(a==="shortcuts"){ closeSettings(); openShortcuts(); }
       else if(a==="or-show"){ const k = $("#orKey"); if(k){ const show = k.type==="password"; k.type = show ? "text" : "password"; b.textContent = show ? "Hide" : "Show"; } }
       else if(a==="gem-show"){ const k = $("#gemKey"); if(k){ const show = k.type==="password"; k.type = show ? "text" : "password"; b.textContent = show ? "Hide" : "Show"; } }
       else if(a==="gem-test") geminiTest();
@@ -3997,6 +4132,7 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSettings(); 
 $("#settingsBtn").onclick = openSettings;
 applyTheme(); applyFs();
 if(PREFS.get("or_mig","")!=="1"){ PREFS.set("provider","openrouter"); PREFS.set("or_mig","1"); }
+if(PREFS.get("or_mig2","")!=="luna"){ const m = (PREFS.get("or_model","")||"").trim(); if(!m || /claude-haiku/i.test(m)) PREFS.set("or_model",""); PREFS.set("or_mig2","luna"); }   /* one-time switch to GPT-6 Luna; a custom model id you typed is kept */
 if(PREFS.get("gem_mig","")!=="35fl"){ PREFS.set("gem_model","gemini-3.5-flash-lite"); PREFS.set("gem_mig","35fl"); }   /* one-time switch to Gemini 3.5 Flash-Lite (Budget) */
 paintGemStat(); if(provider()==="gemini" && gemKey()) checkGemKey();
 
@@ -4317,7 +4453,7 @@ const Budget = (()=>{
     slimNow(){ return !!(cur && cur.slim); },
     planOK(){ return cur ? cur.planOK : true; },
     compactSystem(plan){
-      return COMPACT_SYS + TIERS[tier].hint + kxHint(true) + customBlock() + "\n\n# Effort level: " + EFFORTS[effort].name + "\n" + EFFORTS[effort].hint
+      return COMPACT_SYS + TIERS[tier].hint + oaExtras() + kxHint(true) + customBlock() + "\n\n# Effort level: " + EFFORTS[effort].name + "\n" + EFFORTS[effort].hint
         + (plan ? "\n\n# Private plan (never mention it)\n" + plan.slice(0,3500) : "");
     },
     begin(c, x){
