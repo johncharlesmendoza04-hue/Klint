@@ -1117,6 +1117,126 @@ body{font-family:"Inter Variable","Inter",ui-sans-serif,-apple-system,BlinkMacSy
   .set-x{top:12px;right:12px}
 }
 
+/* ===== Living UI v2: interaction layer ===== */
+.kx::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,var(--accent),transparent 65%);opacity:.85;pointer-events:none}
+.kx:has(.kx-co)::before{display:none}
+.kx-ic{transition:transform .35s cubic-bezier(.3,1.5,.4,1)}.kx:hover .kx-ic{transform:rotate(-8deg) scale(1.12)}
+.kx-acts button{transition:.15s}.kx-acts button:active{transform:scale(.86)}
+.kx-acts .xc svg{transition:transform .3s}.kx.kx-min .xc svg{transform:rotate(-90deg)}
+.kx.kx-min .kx-body,.kx.kx-min .kx-spec{display:none}.kx.kx-min .kx-h{padding-bottom:11px}
+.kx.kx-pop .kx-body{animation:kxFade .3s both}
+.kx-acts .xr.spin svg{animation:kxSpin .6s ease}
+.kx-bd{position:fixed;inset:0;z-index:290;background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:kxFade .2s both}
+.kx.kx-full{position:fixed;inset:4vh 0 auto 0;width:min(1100px,94vw);max-height:92vh;margin:0 auto;overflow:auto;z-index:300;box-shadow:0 40px 120px rgba(0,0,0,.6);animation:xFull .35s cubic-bezier(.2,1,.3,1) both!important}
+@keyframes xFull{from{opacity:0;transform:scale(.94) translateY(16px)}to{opacity:1;transform:none}}
+.x-ctl{display:flex;align-items:center;gap:6px;margin:0 0 10px;flex-wrap:wrap}
+.x-b{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;border:1px solid var(--line2);font-size:12px;color:var(--muted);transition:.15s}
+.x-b:hover{color:var(--text);border-color:var(--accent)}.x-b:active{transform:scale(.94)}
+.x-b.on{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--text);border-color:var(--accent)}
+.x-b svg{width:13px;height:13px}.x-n{margin-left:auto;font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+.x-cf{position:fixed;z-index:500;pointer-events:none;border-radius:2px}
+/* press feedback */
+.kx-btn:active,.kx-chip:active,.kx-opt:active,.kx-chb:active,.kx-swc:active,.kx-seg button:active{transform:scale(.96)}
+.kx-btn.pri{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 50%,transparent);transition:.15s,box-shadow .3s}.kx-btn.pri:hover{box-shadow:0 6px 20px -6px var(--accent)}
+/* spotlight + tilt */
+.kx-stat,.kx-card,.kx-chb,.kx-clk{position:relative;overflow:hidden;--mx:50%;--my:50%}
+.kx-stat::after,.kx-card::after,.kx-chb::after,.kx-clk::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .25s;background:radial-gradient(220px circle at var(--mx) var(--my),color-mix(in srgb,var(--accent) 20%,transparent),transparent 65%)}
+.kx-stat:hover::after,.kx-card:hover::after,.kx-chb:hover::after,.kx-clk:hover::after{opacity:1}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){
+.kx-card,.kx-stat{transform:perspective(800px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .18s ease-out,border-color .2s,box-shadow .25s,opacity .25s,background .2s}
+.kx-card:hover{transform:perspective(800px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-3px)}}
+/* stats */
+.kx-stat{cursor:pointer}.kx-stat.pin{border-color:var(--accent);box-shadow:0 8px 26px -12px var(--accent)}
+.kx-stats:has(.pin) .kx-stat:not(.pin){opacity:.45}
+.kx:not(.kx-still) .kx-stat svg.sp{clip-path:inset(0 100% 0 0);animation:xRev 1s .4s cubic-bezier(.3,.7,.2,1) forwards}
+@keyframes xRev{to{clip-path:inset(0)}}
+/* cards */
+.kx-card{cursor:pointer;--xck:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.kx-card.sel{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--bg))}
+.kx-card.sel::before{content:"";position:absolute;right:10px;top:10px;width:18px;height:18px;border-radius:50%;background:var(--accent) var(--xck) center/11px no-repeat;animation:xPop .35s cubic-bezier(.2,1.6,.4,1)}
+@keyframes xPop{from{transform:scale(0)}}
+.kx-chb.on::before{content:"";position:absolute;right:9px;top:9px;width:16px;height:16px;border-radius:50%;background:var(--accent);animation:xPop .3s cubic-bezier(.2,1.6,.4,1)}
+/* callout, table, quiz, palette */
+.kx-co{cursor:pointer;position:relative;overflow:hidden;transition:opacity .2s}.kx-co::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c)}
+.kx-co svg{animation:xWig 1s .4s ease both}@keyframes xWig{30%{transform:rotate(-14deg) scale(1.15)}60%{transform:rotate(10deg)}}
+.kx-co.fold>div>div{display:none}.kx-co.fold{opacity:.8}
+.kx-t td{cursor:pointer}.kx-t tr.sel td{background:color-mix(in srgb,var(--accent) 16%,transparent)}.kx-t tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.kx-opt.no{animation:xShake .4s}.kx-opt.ok{animation:xOk .45s}
+@keyframes xShake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes xOk{40%{transform:scale(1.03);box-shadow:0 0 0 6px color-mix(in srgb,var(--ok) 25%,transparent)}}
+.kx-swc.xcp .c{animation:xFlash .5s}@keyframes xFlash{30%{filter:brightness(1.5) saturate(1.3)}}
+/* tabs + timeline */
+.kx-tabs{position:relative}.kx-tabs button.on{border-color:transparent}
+.x-ind{position:absolute;bottom:0;height:2px;background:var(--accent);border-radius:2px;transition:left .35s cubic-bezier(.3,1.2,.4,1),width .35s cubic-bezier(.3,1.2,.4,1);pointer-events:none}
+.kx-pn{animation:xPn .35s cubic-bezier(.2,1,.3,1) both}@keyframes xPn{from{opacity:0;transform:translateX(10px)}}
+.kx-tl::after{content:"";position:absolute;left:8px;top:6px;width:2px;height:calc((100% - 12px)*var(--p,0));background:var(--accent2);border-radius:2px;box-shadow:0 0 10px var(--accent);transition:height .5s cubic-bezier(.3,1,.4,1)}
+.kx-ev{transition:opacity .3s}.kx-tl:has(.cur) .kx-ev:not(.cur){opacity:.5}
+.kx-ev.cur:before{background:var(--accent);animation:xPulse 1.6s infinite}@keyframes xPulse{0%,100%{box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}50%{box-shadow:0 0 0 9px transparent}}
+/* chart hover focus */
+.kx-svgw svg .kx-bar,.kx-svgw svg .kx-hbar,.kx-svgw svg .kx-slice,.kx-svgw svg .kx-dot{transition:opacity .2s,filter .2s}
+.kx-svgw svg:has(.kx-bar:hover) .kx-bar:not(:hover),.kx-svgw svg:has(.kx-hbar:hover) .kx-hbar:not(:hover),.kx-svgw svg:has(.kx-slice:hover) .kx-slice:not(:hover),.kx-svgw svg:has(.kx-dot:hover) .kx-dot:not(:hover){opacity:.35}
+.kx-slice:hover,.kx-bar:hover{filter:brightness(1.2)}
+@media (prefers-reduced-motion:reduce){.kx *,.kx{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ===== Apple pass: materials, springs, system color ===== */
+:root{--ease:cubic-bezier(.32,.72,0,1);--spring:linear(0,.18 5%,.55 12%,.86 20%,1.04 29%,1.07 36%,1.03 46%,.995 60%,1 80%,1);--hair:rgba(255,255,255,.09)}
+html[data-theme=light]{--hair:rgba(0,0,0,.09)}
+@keyframes kxIn{from{opacity:0;transform:translateY(14px) scale(.985);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes xSheet{from{opacity:0;transform:translateY(28px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes xMsg{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+.msg{animation:xMsg .6s var(--spring) both}
+.modal.open .mcard{animation:xSheet .6s var(--spring) both}
+/* blocks: glass surface, quiet header, app-icon glyphs */
+.kx{--kxr:22px;background:color-mix(in srgb,var(--card) 78%,transparent);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);border:0;box-shadow:0 0 0 .5px var(--hair),inset 0 .5px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.12),0 18px 40px -18px rgba(0,0,0,.45)}
+.kx:has(.kx-co){box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.kx::before{display:none}
+.kx-h{padding:13px 12px 10px 14px;gap:10px}.kx-h b{font-size:15px;font-weight:600;letter-spacing:-.022em}
+.kx-ic{width:28px;height:28px;border-radius:9px;color:#fff;background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 92%,#fff),color-mix(in srgb,var(--accent) 82%,#000));box-shadow:inset 0 .5px 0 rgba(255,255,255,.4),0 3px 8px -2px color-mix(in srgb,var(--accent) 55%,transparent);transition:transform .6s var(--spring)}
+.kx:hover .kx-ic{transform:scale(1.08) rotate(-4deg)}
+.kx-acts{opacity:.5;transition:opacity .3s var(--ease)}.kx-acts button{border-radius:50%;transition:transform .5s var(--spring),background .2s,color .2s}
+.kx-acts button:active{transform:scale(.82);transition-duration:.08s}
+.kx-stat,.kx-card,.kx-chb,.kx-opt,.kx-out,.kx-clk,.kx-kc,.kx-ac,.kx-swc,.kx-cw,.kx-tw{border-color:var(--hair);border-radius:16px}
+.kx-stat,.kx-card,.kx-chb,.kx-opt,.kx-clk,.kx-ac{background:color-mix(in srgb,var(--bg) 55%,transparent)}
+.kx-card.sel,.kx-stat.pin{box-shadow:0 0 0 1.5px var(--accent),0 14px 30px -14px color-mix(in srgb,var(--accent) 60%,transparent)}
+.kx-card,.kx-chb,.kx-swc,.kx-opt{transition:transform .55s var(--spring),box-shadow .3s var(--ease),background .25s,border-color .25s}
+.kx-card:hover{box-shadow:0 18px 36px -18px rgba(0,0,0,.6)}
+.kx-stat .v{font-weight:700;letter-spacing:-.035em}
+/* buttons and chips: capsules with spring release */
+.kx-btn{border:0;border-radius:999px;padding:8px 16px;font-weight:600;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent2);transition:transform .55s var(--spring),background .2s,filter .2s}
+.kx-btn:hover{border-color:transparent;background:color-mix(in srgb,var(--accent) 26%,transparent)}
+.kx-btn.pri{background:var(--accent);color:#fff}.kx-btn.pri:hover{background:var(--accent);filter:brightness(1.1)}
+.kx-btn:active,.kx-chip:active,.kx-opt:active,.kx-chb:active,.kx-swc:active{transform:scale(.95);filter:brightness(.92);transition-duration:.08s}
+.kx-chip{border-color:transparent;background:color-mix(in srgb,var(--text) 8%,transparent);transition:transform .55s var(--spring),background .2s,color .2s}
+.kx-chip.on{background:var(--accent);color:#fff}
+.chip,.sg{transition:transform .55s var(--spring),background .2s,color .2s,border-color .2s}.chip:hover,.sg:hover{transform:translateY(-2px) scale(1.02)}.chip:active,.sg:active{transform:scale(.95);transition-duration:.08s}
+/* iOS segmented control */
+.kx-seg{position:relative;flex-wrap:nowrap;padding:2px;border:0;border-radius:10px;background:color-mix(in srgb,var(--text) 9%,transparent)}
+.kx-seg button{position:relative;z-index:1;font-weight:500}.kx-seg button.on{background:transparent;box-shadow:none;font-weight:600}
+.x-thumb{position:absolute;top:2px;bottom:2px;z-index:0;border-radius:8px;pointer-events:none;background:var(--card2);box-shadow:0 0 0 .5px var(--hair),0 3px 8px rgba(0,0,0,.25),0 1px 1px rgba(0,0,0,.1);transition:left .55s var(--spring),width .55s var(--spring)}
+html[data-theme=light] .x-thumb{background:#fff}
+.x-ind{transition:left .55s var(--spring),width .55s var(--spring)}
+.kx-ac .c,.kx-ev .ds{transition:grid-template-rows .55s var(--ease)}.kx-ac>button svg{transition:transform .5s var(--spring)}
+/* iOS sliders */
+.kx input[type=range]{-webkit-appearance:none;appearance:none;height:28px;background:transparent;--p:50%}
+.kx input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--accent) var(--p),color-mix(in srgb,var(--text) 16%,transparent) var(--p))}
+.kx input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-10px;border-radius:50%;background:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.1),0 3px 8px rgba(0,0,0,.35);transition:transform .4s var(--spring)}
+.kx input[type=range]:active::-webkit-slider-thumb{transform:scale(1.18)}
+.kx input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:color-mix(in srgb,var(--text) 16%,transparent)}.kx input[type=range]::-moz-range-progress{height:4px;border-radius:4px;background:var(--accent)}
+.kx input[type=range]::-moz-range-thumb{width:24px;height:24px;border:0;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.35)}
+/* app chrome */
+.composer{border-radius:26px;border-color:var(--hair);background:color-mix(in srgb,var(--card) 82%,transparent);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);box-shadow:0 0 0 .5px var(--hair),0 14px 40px -18px rgba(0,0,0,.55);transition:box-shadow .4s var(--ease),border-color .3s}
+.composer:focus-within{border-color:color-mix(in srgb,#0a84ff 55%,transparent);box-shadow:0 0 0 4px color-mix(in srgb,#0a84ff 24%,transparent),0 20px 48px -18px rgba(0,0,0,.65)}
+.send{transition:transform .55s var(--spring),background .25s,color .25s}.send.ready{background:#0a84ff;color:#fff}.send.ready:hover{transform:scale(1.1)}.send:active{transform:scale(.86);transition-duration:.08s}
+.icon-btn{transition:transform .55s var(--spring),background .15s,color .15s}.icon-btn:active{transform:scale(.86);transition-duration:.08s}
+.hi,.nav,.newchat{transition:background .25s var(--ease),transform .5s var(--spring)}.hi:active,.nav:active,.newchat:active{transform:scale(.98);transition-duration:.08s}
+.sb{transition:margin .55s var(--ease),opacity .35s var(--ease)}
+.toast{background:color-mix(in srgb,var(--panel) 72%,transparent);color:var(--text);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);box-shadow:0 0 0 .5px var(--hair),0 18px 44px -10px rgba(0,0,0,.55);padding:10px 20px;transform:translate(-50%,24px) scale(.9);transition:transform .6s var(--spring),opacity .25s}
+.toast.on{transform:translate(-50%,0) scale(1)}
+/* focus view: shared-element zoom */
+::view-transition-group(kxv){animation-duration:.65s;animation-timing-function:var(--spring)}
+html.vt .kx.kx-full{animation:none!important}.kx.kx-full{border-radius:28px}
+@supports (corner-shape:squircle){.kx,.kx-stat,.kx-card,.kx-ic,.kx-chb,.kx-opt,.kx-swc,.kx-ac,.composer,.mcard,.kx-kc{corner-shape:squircle}.kx{--kxr:28px;border-radius:28px}}
+
 </style>
 </head>
 <body>
@@ -1636,20 +1756,12 @@ Mode focus: UI and motion. Deliver an interactive prototype, not a still. Define
 code: `
 Mode focus: code. Use the language the user names. Deliver runnable code with entry point, imports, input validation and meaningful errors, plus a few tests or example calls with expected output and one line on how to run it. For bugs: root cause, minimal fix, why it works, how to verify. Never rewrite unrelated code.`
 };
-const GPT_HINT = `
-
-# Engine notes
-- Treat the system instructions as binding. Think privately, then output only the final answer in the required format.
-- Living UI blocks: write the fence exactly as three backticks followed by the block name (for example ui-chart), then ONE valid JSON object with double quotes, no comments, no trailing commas, then closing backticks. Never wrap a block in another code fence and never add prose inside it.
-- Code: always return complete files or exact patch blocks in the required format. Never truncate, never use placeholders like "rest of code here".
-- Keep prose short and plain: no preamble, no restating the request.`;
-const oaExtras = () => (provider()==="hf" || (provider()==="openrouter" && /^openai\//i.test(PREFS.get("or_model","") || OR_DEFAULT))) ? GPT_HINT : "";
 const gemExtras = () => provider()==="gemini" ? GEM_BASE_HINT + (GEM_MODE[pbOf()]||"") : "";
 const buildSystemFull = plan => {
   const tail = "\n\n# Effort level: " + EFFORTS[effort].name + "\n" + EFFORTS[effort].hint
     + (plan ? "\n\n# Private plan from your planning stage (never mention or reveal it; follow it and fix anything it flags)\n" + plan.slice(0,3500) : "");
-  if(REQ.lean) return EDIT_SYS + (REQ.gui ? GUI_HINT : "") + TIERS[tier].hint + plHintsFor() + (provider()==="gemini" ? GEM_BASE_HINT : "") + oaExtras() + customBlock() + editBlock() + tail;
-  return KLINT_SYSTEM + (MODES[pbOf()].hint||"") + TIERS[tier].hint + plHintsFor() + extrasFor(pbOf()) + gemExtras() + oaExtras() + kxHint() + customBlock() + editBlock() + tail;
+  if(REQ.lean) return EDIT_SYS + (REQ.gui ? GUI_HINT : "") + TIERS[tier].hint + plHintsFor() + (provider()==="gemini" ? GEM_BASE_HINT : "") + customBlock() + editBlock() + tail;
+  return KLINT_SYSTEM + (MODES[pbOf()].hint||"") + TIERS[tier].hint + plHintsFor() + extrasFor(pbOf()) + gemExtras() + kxHint() + customBlock() + editBlock() + tail;
 };
 const buildSystem = plan => Budget.slimNow() ? Budget.compactSystem(plan) : buildSystemFull(plan);
 function renderHome(){
@@ -2640,141 +2752,61 @@ def("run", {icon: "code", label: "Try it", persist: false,
 return {has: l => /^ui-/.test(l) && !!DEFS[l.slice(3)], render, names: () => Object.keys(DEFS), defs: DEFS};
 })();
 
-/* ============ OPENROUTER (GPT-6 Luna) ============ */
-const OR_DEFAULT = "openai/gpt-6-luna";
-const HF_DEFAULT = "deepseek-ai/DeepSeek-V4.1-Flash";
-const isHF = () => PREFS.get("provider","openrouter") === "hf";
-const apiName = () => isHF() ? "Hugging Face" : "OpenRouter";
-/* orKey / orModel / orErr / orFetch serve whichever OpenAI-compatible provider is active (OpenRouter or Hugging Face) */
-const orKey = () => (isHF() ? PREFS.get("hf_key", "") : PREFS.get("or_key", "")).trim();
-const orModel = () => (isHF() ? (PREFS.get("hf_model", "") || HF_DEFAULT) : (PREFS.get("or_model", "") || OR_DEFAULT)).trim();
-const orErr = (st, j) => {
-  const m = (j && j.error && (j.error.message || j.error)) || "", n = apiName();
-  return st === 401 || st === 403 ? (isHF() ? "Hugging Face rejected your token. Create one with the \"Make calls to Inference Providers\" permission and paste it in Settings." : "OpenRouter rejected your API key. Check it in Settings.")
-    : st === 402 ? (isHF() ? "Your Hugging Face Inference Providers credits are used up. Check huggingface.co/settings/billing." : "Your OpenRouter account is out of credits. Add credits at openrouter.ai/credits.")
-    : st === 429 ? n + " rate limit reached. Wait a moment and retry."
-    : st === 404 || (isHF() && st === 400 && /model.*(not|unknown|exist|support)/i.test(JSON.stringify(m))) ? "Model not found on " + n + ": " + orModel() + (isHF() ? ". Copy the id from the model page on huggingface.co (for example deepseek-ai/DeepSeek-V4.1-Flash) and check that an Inference Provider serves it." : "")
-    : n + " error" + (st ? " (" + st + ")" : "") + (m ? ": " + (typeof m === "string" ? m : JSON.stringify(m)) : "");
-};
-/* GPT-6 models take reasoning effort none/low/medium/high/xhigh/max. Klint's 5 levels map onto them; other models keep the old mapping. */
-const orIsGpt6 = () => /^openai\/gpt-6/i.test(orModel());
-const orEffort = () => orIsGpt6() ? ["none","low","medium","high","xhigh"][effort] : EFFORTS[effort].api;
-/* ordered list of reasoning settings to try for the live stream; null = send no reasoning field */
-function orReasoningAttempts(){
-  const e = orEffort();
-  if(isHF()){ if(effort === 0) return [null]; const le = ["low","low","medium","high","high"][effort]; return [{effort:le}, null]; }   /* HF router: OpenAI-style reasoning_effort, dropped if the provider rejects it */
-  if(!orIsGpt6()) return (e === "minimal") ? [null] : [{effort:e}, null];
-  const out = [];
-  if(e !== "none") out.push({effort:e, summary:"auto"}, {effort:e});
-  if(e !== "low" && e !== "none") out.push({effort:"low"});   /* retry cheaper if thinking used up the whole budget */
-  out.push({effort:"none"});
-  return out;
-}
+/* ============ OPENROUTER (Claude Haiku 5.5) ============ */
+const OR_DEFAULT = "anthropic/claude-haiku-5.5";
+const orKey = () => PREFS.get("or_key", "").trim();
+const orModel = () => (PREFS.get("or_model", "") || OR_DEFAULT).trim();
+const orErr = (st, j) => { const m = (j && j.error && (j.error.message || j.error)) || ""; return st === 401 ? "OpenRouter rejected your API key. Check it in Settings." : st === 402 ? "Your OpenRouter account is out of credits. Add credits at openrouter.ai/credits." : st === 429 ? "OpenRouter rate limit reached. Wait a moment and retry." : st === 404 ? "Model not found on OpenRouter: " + orModel() : "OpenRouter error" + (st ? " (" + st + ")" : "") + (m ? ": " + (typeof m === "string" ? m : JSON.stringify(m)) : ""); };
 function orBody(history, system, stream, reasoning){
   const msgs = [{role: "system", content: system || buildSystem()}, ...history.map(m => ({role: m.role, content: (m.images && m.images.length) ? [{type: "text", text: m.content}, ...m.images.map(u => ({type: "image_url", image_url: {url: u}}))] : m.content}))];
-  const b = {model: orModel(), messages: msgs, stream, max_tokens: orIsGpt6() ? 64000 : 32000};   /* reasoning tokens count toward max_tokens, so leave GPT-6 room for thinking AND a full file */
-  if(reasoning){ if(isHF()) b.reasoning_effort = reasoning.effort; else b.reasoning = reasoning; }
+  const b = {model: orModel(), messages: msgs, stream, max_tokens: 32000};
+  if(reasoning) b.reasoning = {effort: EFFORTS[effort].api};
   return b;
 }
 async function orFetch(body, signal){
   let res;
-  const url = isHF() ? "https://router.huggingface.co/v1/chat/completions" : "https://openrouter.ai/api/v1/chat/completions";
-  const headers = {"Authorization": "Bearer " + orKey(), "Content-Type": "application/json"};
-  if(!isHF()){ headers["HTTP-Referer"] = (location.origin && location.origin !== "null") ? location.origin : "https://klint.app"; headers["X-Title"] = "Klint"; }
-  try{ res = await fetch(url, {method: "POST", signal, headers, body: JSON.stringify(body)}); }
-  catch(e){ if(e && e.name === "AbortError") throw e; throw new Error("Couldn't reach " + apiName() + ". Check your internet connection."); }
+  try{ res = await fetch("https://openrouter.ai/api/v1/chat/completions", {method: "POST", signal, headers: {"Authorization": "Bearer " + orKey(), "Content-Type": "application/json", "HTTP-Referer": (location.origin && location.origin !== "null") ? location.origin : "https://klint.app", "X-Title": "Klint"}, body: JSON.stringify(body)}); }
+  catch(e){ if(e && e.name === "AbortError") throw e; throw new Error("Couldn't reach OpenRouter. Check your internet connection."); }
   if(!res.ok){ let j = null; try{ j = await res.json(); }catch(_){} const e = new Error(orErr(res.status, j)); e.status = res.status; e.raw = j; throw e; }
   return res;
 }
-/* some providers send DeepSeek reasoning inline as <think>...</think> inside the content: split it into thought and answer, even when a tag is cut across chunks */
-function orSplitThink(tx, st){
-  let buf = (st.hold || "") + tx; st.hold = ""; let ans = "", th = "";
-  for(;;){
-    const tag = st.inT ? "</think>" : "<think>", i = buf.indexOf(tag);
-    if(i >= 0){ if(st.inT) th += buf.slice(0, i); else ans += buf.slice(0, i); buf = buf.slice(i + tag.length); st.inT = !st.inT; continue; }
-    let k = 0; for(let n = Math.min(tag.length - 1, buf.length); n > 0; n--){ if(tag.startsWith(buf.slice(buf.length - n))){ k = n; break; } }
-    if(st.inT) th += buf.slice(0, buf.length - k); else ans += buf.slice(0, buf.length - k); st.hold = buf.slice(buf.length - k); break;
-  }
-  return {ans, th};
-}
-const orTextOf = c => typeof c === "string" ? c : Array.isArray(c) ? c.map(x => (x && (x.text || x.content)) || "").join("") : "";
-/* pull readable reasoning text out of one streamed delta (plain "reasoning", "reasoning_content", or OpenRouter's reasoning_details summaries) */
-function orThoughtOf(dl, st){
-  if(typeof dl.reasoning === "string" && dl.reasoning) return dl.reasoning;
-  if(typeof dl.reasoning_content === "string" && dl.reasoning_content) return dl.reasoning_content;
-  const det = dl.reasoning_details; if(!Array.isArray(det)) return "";
-  let out = "";
-  for(const d of det){
-    if(!d || /encrypted/i.test(d.type || "")) continue;
-    const t = typeof d.text === "string" && d.text ? d.text : (typeof d.summary === "string" ? d.summary : ""); if(!t) continue;
-    const key = String(d.id != null ? d.id : (d.index != null ? d.index : ""));
-    if(st.rid !== undefined && key !== st.rid && st.any) out += "\n\n";   /* new summary part: keep the **headings** on their own line so the live status can read them */
-    st.rid = key; st.any = true; out += t;
-  }
-  return out;
-}
 async function orStream(history, onToken, system, onThought){
-  const tries = orReasoningAttempts(); let lastFin = "";
-  for(let ti = 0; ti < tries.length; ti++){
-    const ctl = new AbortController(), watch = setInterval(() => { if(abortFlag) ctl.abort(); }, 120); let got = false, thoughtSeen = false, fin = ""; const tst = {};
+  for(const withR of [true, false]){
+    const ctl = new AbortController(), watch = setInterval(() => { if(abortFlag) ctl.abort(); }, 120); let got = false;
     try{
-      const res = await orFetch(orBody(history, system, true, tries[ti]), ctl.signal);
+      const res = await orFetch(orBody(history, system, true, withR && EFFORTS[effort].api !== "minimal"), ctl.signal);
       const rd = res.body.getReader(), dec = new TextDecoder(); let buf = "";
-      const handle = line => {
-        line = line.trim(); if(!line.startsWith("data:")) return; const d = line.slice(5).trim(); if(!d || d === "[DONE]") return;
-        let j; try{ j = JSON.parse(d); }catch(_){ return; }
-        if(j.error){ const e = new Error(orErr(j.error.code || 0, j)); e.status = j.error.code; throw e; }
-        const ch = (j.choices && j.choices[0]) || {}, dl = ch.delta || {};
-        if(ch.finish_reason) fin = ch.finish_reason;
-        const th = orThoughtOf(dl, tst); if(th && onThought){ thoughtSeen = true; onThought(th); }
-        let tx = orTextOf(dl.content) || (typeof dl.refusal === "string" ? dl.refusal : "") || orTextOf(ch.message && ch.message.content);
-        if(tx && (tst.inT || tst.hold || tx.indexOf("<") >= 0)){ const sp = orSplitThink(tx, tst); tx = sp.ans; if(sp.th && onThought){ thoughtSeen = true; onThought(sp.th); } }
-        if(tx){ got = true; onToken(tx); }
-      };
       for(;;){
         const {done, value} = await rd.read(); if(done) break;
         if(abortFlag){ try{ rd.cancel(); }catch(_){} break; }
         buf += dec.decode(value, {stream: true}); let i;
-        while((i = buf.indexOf("\n")) >= 0){ const line = buf.slice(0, i); buf = buf.slice(i + 1); handle(line); }
+        while((i = buf.indexOf("\n")) >= 0){
+          const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+          if(!line.startsWith("data:")) continue; const d = line.slice(5).trim(); if(d === "[DONE]") continue;
+          let j; try{ j = JSON.parse(d); }catch(_){ continue; }
+          if(j.error){ const e = new Error(orErr(j.error.code || 0, j)); e.status = j.error.code; throw e; }
+          const dl = (j.choices && j.choices[0] && j.choices[0].delta) || {};
+          if(dl.reasoning && onThought) onThought(dl.reasoning);
+          if(dl.content){ got = true; onToken(dl.content); }
+        }
       }
-      if(buf.trim()) handle(buf);   /* last line without a trailing newline */
-      if(tst.hold && !tst.inT){ got = true; onToken(tst.hold); tst.hold = ""; }   /* a stray "<" held back while waiting for a tag */
-      if(abortFlag) return;
-      if(got) return;
-      /* the stream ended with no answer text (usually the model spent its whole budget thinking): retry cheaper */
-      lastFin = fin || lastFin;
-      if(ti < tries.length - 1) continue;
-      break;
+      return;
     }catch(e){
       if(abortFlag || (e && e.name === "AbortError")) return;
-      /* the model or route rejected the reasoning settings: retry with a simpler setting, finally with none */
-      if(!got && !thoughtSeen && ti < tries.length - 1 && (e.status === 400 || e.status === 422)) continue;
+      if(!got && withR && e.status === 400 && /reason|effort|thinking/i.test(e.message + JSON.stringify(e.raw || ""))) continue;
       throw e;
     }finally{ clearInterval(watch); }
   }
-  throw new Error(lastFin === "length" ? "The model ran out of tokens while thinking. Lower the Effort level or shorten the request." : lastFin === "content_filter" ? "OpenRouter's provider blocked this reply. Try rewording the request." : "The model finished without writing an answer, even after retrying with less thinking. Try again, or lower the Effort level.");
 }
-async function orOnce(msgs, maxTok){
-  const lim = maxTok || (orIsGpt6() ? 12000 : 4000);
-  const tries = orIsGpt6() ? [{effort:"low"}, null] : [null];   /* side tasks need little thinking; low keeps GPT-6 from burning the budget before it answers */
-  let lastE = null;
-  for(const r of tries){
-    try{
-      const body = {model: orModel(), messages: msgs, stream: false, max_tokens: lim}; if(r) body.reasoning = r;
-      const res = await orFetch(body);
-      const j = await res.json(); const c = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
-      const t = (typeof c === "string" ? c : Array.isArray(c) ? c.map(x => (x && x.text) || "").join("") : "").trim();
-      if(t || r === null) return t;
-    }catch(e){ lastE = e; if(!(e && (e.status === 400 || e.status === 422)) || r === null) throw e; }
+async function orOnce(msgs){
+  for(const withR of [false]){
+    const res = await orFetch({model: orModel(), messages: msgs, stream: false, max_tokens: 4000});
+    const j = await res.json(); return ((j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || "").trim();
   }
-  if(lastE) throw lastE; return "";
 }
-const hfPanel = () => `<div class="s-sec">Hugging Face</div>
-        <div class="srow col"><div><b>Access token</b><small>Create a fine-grained token at huggingface.co/settings/tokens with the "Make calls to Inference Providers" permission. It is stored only in this browser.</small></div><div style="display:flex;gap:8px;align-items:center"><input id="hfKey" class="tin" style="flex:1;min-height:0;height:38px" type="password" autocomplete="off" spellcheck="false" placeholder="hf_..." value="${esc(PREFS.get("hf_key", ""))}"><button type="button" class="btn" data-s="hf-show">Show</button></div></div>
-        <div class="srow col"><div><b>Model</b><small>Default is DeepSeek V4.1 Flash (${HF_DEFAULT}). Use any model id from huggingface.co that an Inference Provider serves. Add :fastest or :cheapest to the id to pick how the router chooses a provider.</small></div><input id="hfModel" class="tin" style="min-height:0;height:38px" type="text" spellcheck="false" placeholder="${HF_DEFAULT}" value="${esc(PREFS.get("hf_model", ""))}"></div>`;
 const orPanel = () => `<div class="s-sec">OpenRouter</div>
-        <div class="srow col"><div><b>API key</b><small>Get one at openrouter.ai/keys. It is stored only in this browser.</small></div><div style="display:flex;gap:8px;align-items:center"><input id="orKey" class="tin" style="flex:1;min-height:0;height:38px" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-v1-..." value="${esc(PREFS.get("or_key", ""))}"><button type="button" class="btn" data-s="or-show">Show</button></div></div>
-        <div class="srow col"><div><b>Model</b><small>Default is GPT-6 Luna (openai/gpt-6-luna). Any OpenRouter model id works.</small></div><input id="orModel" class="tin" style="min-height:0;height:38px" type="text" spellcheck="false" placeholder="${OR_DEFAULT}" value="${esc(PREFS.get("or_model", ""))}"></div>`;
+        <div class="srow col"><div><b>API key</b><small>Get one at openrouter.ai/keys. It is stored only in this browser.</small></div><div style="display:flex;gap:8px;align-items:center"><input id="orKey" class="tin" style="flex:1;min-height:0;height:38px" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-v1-..." value="${esc(orKey())}"><button type="button" class="btn" data-s="or-show">Show</button></div></div>
+        <div class="srow col"><div><b>Model</b><small>Default is Claude Haiku 5.5. Any OpenRouter model id works.</small></div><input id="orModel" class="tin" style="min-height:0;height:38px" type="text" spellcheck="false" placeholder="${OR_DEFAULT}" value="${esc(PREFS.get("or_model", ""))}"></div>`;
 
 /* ============ LIVING UI PROMPT + GALLERY ============ */
 const KX_DOC = [
@@ -3015,7 +3047,7 @@ const FAST_GEM = "gemini-3.5-flash-lite";   /* used for side tasks (titles, sugg
 const provider = () => PREFS.get("provider","openrouter");
 const gemKey = () => PREFS.get("gem_key","");
 const gemModel = () => PREFS.get("gem_model","gemini-3.5-flash-lite");
-const needsKey = () => (provider()==="gemini" && !gemKey()) || ((provider()==="openrouter" || provider()==="hf") && !orKey());
+const needsKey = () => (provider()==="gemini" && !gemKey()) || (provider()==="openrouter" && !orKey());
 function gemList(){
   let loaded = []; try{ loaded = JSON.parse(PREFS.get("gem_models","[]")) || []; }catch(_){}
   if(!loaded.length) return GEMINI_MODELS;
@@ -3146,7 +3178,7 @@ async function geminiOnce(msgs, model, maxTok){
 }
 /* one non-streaming call for the planner (side=false) and for titles and suggestions (side=true) */
 async function llmOnce(msgs, side){
-  if(provider()==="openrouter" || provider()==="hf") return await orOnce(msgs);
+  if(provider()==="openrouter") return await orOnce(msgs);
   if(provider()==="puter"){
     for(const model of [BASE_MODEL, FALLBACK_MODEL]){
       try{ const o = { stream:false }; if(model) o.model = model; const t = textOf(await puter.ai.chat(msgs, o)).trim(); if(t) return t; }catch(_){}
@@ -3267,7 +3299,7 @@ async function makePlan(history){
 
 /* ============ AI ============ */
 async function streamAI(history, onToken, system, onThought){
-  if(provider()==="openrouter" || provider()==="hf") return orStream(history, onToken, system, onThought);
+  if(provider()==="openrouter") return orStream(history, onToken, system, onThought);
   if(provider()==="gemini") return geminiStream(history, onToken, system, onThought);
   const hasImg = history.some(m=>m.images&&m.images.length);
   const msgs = [{role:"system", content:system || buildSystem()}, ...history.map(m=>({role:m.role, content: (m.images&&m.images.length) ? [{type:"text",text:m.content}, ...m.images.map(u=>({type:"image_url", image_url:{url:u}}))] : m.content}))];
@@ -3413,7 +3445,7 @@ async function respond(c){
         }
       }
     }
-    if(!full.trim()) throw new Error(provider()==="openrouter" ? "No response received from OpenRouter. Check your key and model in Settings." : provider()==="hf" ? "No response received from Hugging Face. Check your token and model in Settings." : provider()==="gemini" ? "No response received from Gemini. Check your key and model in Settings." : "No response received. Make sure Puter is reachable and sign in if prompted.");
+    if(!full.trim()) throw new Error(provider()==="openrouter" ? "No response received from OpenRouter. Check your key and model in Settings." : provider()==="gemini" ? "No response received from Gemini. Check your key and model in Settings." : "No response received. Make sure Puter is reachable and sign in if prompted.");
   }catch(e){
     let msg = (e && (e.message || e.error?.message || e.msg || (typeof e==="string"?e:""))) || "Something went wrong.";
     if(provider()==="puter" && /token|unauthori|401|not signed|sign.?in|auth/i.test(String((e&&(e.code||e.error&&e.error.code))||"")+" "+msg)) msg += " Open Settings, then Account, and sign in again.";
@@ -4011,9 +4043,9 @@ function authState(){
 }
 const needsSignIn = () => provider()==="puter" && authState() === false;
 function promptForKey(){
-  toast(provider()==="openrouter" ? "Add your OpenRouter API key in Settings to start" : provider()==="hf" ? "Add your Hugging Face token in Settings to start" : "Add your Gemini API key in Settings to start", 4000);
+  toast(provider()==="openrouter" ? "Add your OpenRouter API key in Settings to start" : "Add your Gemini API key in Settings to start", 4000);
   openSettings();
-  setTimeout(()=>{ const k = $("#orKey") || $("#hfKey") || $("#gemKey"); if(k){ k.focus(); k.scrollIntoView({block:"center"}); } }, 80);
+  setTimeout(()=>{ const k = $("#orKey") || $("#gemKey"); if(k){ k.focus(); k.scrollIntoView({block:"center"}); } }, 80);
 }
 function authHints(){
   const h = [];
@@ -4100,8 +4132,8 @@ function paintSettings(){
     model: head("Model", "Choose the brain and how hard it thinks.")
       + `<div class="grp">${row("Model",esc(TIERS[tier].desc),seg("tier",Object.entries(TIERS).map(([k,t])=>[k,t.name,t.icon]),tier))}${row("Effort",esc(EFFORTS[effort].desc),seg("effort",EFFORTS.map((e,i)=>[String(i),e.name]),String(effort)))}</div>`,
     engine: head("AI engine", "Where the replies come from.")
-      + `<div class="grp">${row("Provider",prov==="openrouter" ? "OpenRouter key, GPT-6 Luna by default" : prov==="hf" ? "Hugging Face token, DeepSeek V4.1 Flash by default" : prov==="gemini" ? "Your own Gemini API key, billed by Google" : "Puter account (user pays), no key needed",seg("provider",[["hf","Hugging Face"],["openrouter","OpenRouter"],["gemini","Gemini API"],["puter","Puter"]],prov))}</div>`
-      + (prov==="openrouter" ? orPanel() : prov==="hf" ? hfPanel() : prov==="gemini" ? geminiPanel() : `<div class="s-sec">Puter account</div><div class="acct-box" id="acctBox"></div>`),
+      + `<div class="grp">${row("Provider",prov==="openrouter" ? "OpenRouter key, Claude Haiku 5.5 by default" : prov==="gemini" ? "Your own Gemini API key, billed by Google" : "Puter account (user pays), no key needed",seg("provider",[["openrouter","OpenRouter"],["gemini","Gemini API"],["puter","Puter"]],prov))}</div>`
+      + (prov==="openrouter" ? orPanel() : prov==="gemini" ? geminiPanel() : `<div class="s-sec">Puter account</div><div class="acct-box" id="acctBox"></div>`),
     kx: head("Living UI", "Interactive charts, forms, maps and more, right inside answers.") + kxPanel(),
     data: head("Data", "Your chats live on this device only.")
       + `<div class="grp">${row("Chats",chats.length+" saved on this device",`<button type="button" class="btn danger" data-s="clear">${SVG("trash")}Clear all</button>`)}${row("New chat","Start a fresh conversation",`<kbd><span>Ctrl</span><span>N</span></kbd>`)}${row("Keyboard shortcuts","See everything you can do from the keyboard",`<button type="button" class="btn" data-s="shortcuts">${SVG("keys")}Show</button>`)}</div>`
@@ -4119,7 +4151,7 @@ function openSettings(){
   if(!m){
     m = document.createElement("div"); m.id = "settings"; m.className = "modal";
     document.body.appendChild(m);
-    m.addEventListener("input", e=>{ if(e.target && e.target.id==="orKey") PREFS.set("or_key", e.target.value.trim()); else if(e.target && e.target.id==="orModel") PREFS.set("or_model", e.target.value.trim()); else if(e.target && e.target.id==="hfKey") PREFS.set("hf_key", e.target.value.trim()); else if(e.target && e.target.id==="hfModel") PREFS.set("hf_model", e.target.value.trim()); else if(e.target && e.target.id==="gemKey"){ PREFS.set("gem_key", e.target.value.trim()); scheduleGemCheck(); } else if(e.target && e.target.id==="customIns") PREFS.set("custom", e.target.value.slice(0,1500)); });
+    m.addEventListener("input", e=>{ if(e.target && e.target.id==="orKey") PREFS.set("or_key", e.target.value.trim()); else if(e.target && e.target.id==="orModel") PREFS.set("or_model", e.target.value.trim()); else if(e.target && e.target.id==="gemKey"){ PREFS.set("gem_key", e.target.value.trim()); scheduleGemCheck(); } else if(e.target && e.target.id==="customIns") PREFS.set("custom", e.target.value.slice(0,1500)); });
     m.addEventListener("change", e=>{ if(e.target && e.target.id==="gemModel"){ PREFS.set("gem_model", e.target.value); toast("Model: "+e.target.value); paintSettings(); scheduleGemCheck(); } });
     m.addEventListener("click", async e=>{
       if(e.target===m) return closeSettings();
@@ -4140,7 +4172,7 @@ function openSettings(){
       else if(a==="stab"){ window.__kxTab = b.dataset.t; paintSettings(); }
       else if(a==="kxtry"){ closeSettings(); if(busy) return toast("Wait for the reply to finish"); submit(KX_DOC[+b.dataset.i][3]); }
       else if(a==="shortcuts"){ closeSettings(); openShortcuts(); }
-      else if(a==="or-show" || a==="hf-show"){ const k = $(a==="hf-show" ? "#hfKey" : "#orKey"); if(k){ const show = k.type==="password"; k.type = show ? "text" : "password"; b.textContent = show ? "Hide" : "Show"; } }
+      else if(a==="or-show"){ const k = $("#orKey"); if(k){ const show = k.type==="password"; k.type = show ? "text" : "password"; b.textContent = show ? "Hide" : "Show"; } }
       else if(a==="gem-show"){ const k = $("#gemKey"); if(k){ const show = k.type==="password"; k.type = show ? "text" : "password"; b.textContent = show ? "Hide" : "Show"; } }
       else if(a==="gem-test") geminiTest();
       else if(a==="gem-load") gemLoadModels();
@@ -4163,8 +4195,6 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSettings(); 
 $("#settingsBtn").onclick = openSettings;
 applyTheme(); applyFs();
 if(PREFS.get("or_mig","")!=="1"){ PREFS.set("provider","openrouter"); PREFS.set("or_mig","1"); }
-if(PREFS.get("hf_mig","")!=="1"){ PREFS.set("provider","hf"); PREFS.set("hf_mig","1"); }   /* one-time: Hugging Face (DeepSeek V4.1 Flash) becomes the active provider */
-if(PREFS.get("or_mig2","")!=="luna"){ const m = (PREFS.get("or_model","")||"").trim(); if(!m || /claude-haiku/i.test(m)) PREFS.set("or_model",""); PREFS.set("or_mig2","luna"); }   /* one-time switch to GPT-6 Luna; a custom model id you typed is kept */
 if(PREFS.get("gem_mig","")!=="35fl"){ PREFS.set("gem_model","gemini-3.5-flash-lite"); PREFS.set("gem_mig","35fl"); }   /* one-time switch to Gemini 3.5 Flash-Lite (Budget) */
 paintGemStat(); if(provider()==="gemini" && gemKey()) checkGemKey();
 
@@ -4485,7 +4515,7 @@ const Budget = (()=>{
     slimNow(){ return !!(cur && cur.slim); },
     planOK(){ return cur ? cur.planOK : true; },
     compactSystem(plan){
-      return COMPACT_SYS + TIERS[tier].hint + oaExtras() + kxHint(true) + customBlock() + "\n\n# Effort level: " + EFFORTS[effort].name + "\n" + EFFORTS[effort].hint
+      return COMPACT_SYS + TIERS[tier].hint + kxHint(true) + customBlock() + "\n\n# Effort level: " + EFFORTS[effort].name + "\n" + EFFORTS[effort].hint
         + (plan ? "\n\n# Private plan (never mention it)\n" + plan.slice(0,3500) : "");
     },
     begin(c, x){
@@ -5380,6 +5410,111 @@ syncPlugins();
   setTimeout(open, reduce ? 400 : 3000);
 })();
 
+
+/* ===== Living UI v2: interaction layer ===== */
+;(()=>{
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, $$ = (r, s) => [...r.querySelectorAll(s)];
+const svg = p => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
+const IX = {min: svg('<path d="M6 9l6 6 6-6"/>'), full: svg('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'), close: svg('<path d="M6 6l12 12M18 6L6 18"/>'), rep: svg('<path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5"/>'), ok: svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'), prev: svg('<path d="M15 6l-6 6 6 6"/>'), next: svg('<path d="M9 6l6 6-6 6"/>'), play: svg('<path d="M8 5.5v13l11-6.5z"/>'), pause: svg('<path d="M8 5v14M16 5v14"/>')};
+/* every block type gets its own color */
+const TC = {chart:"#0a84ff",plot:"#0a84ff",stats:"#bf5af2",table:"#8e8e93",compare:"#64d2ff",cards:"#ff375f",timeline:"#ff9f0a",steps:"#30d158",checklist:"#30d158",calc:"#ff9f0a",form:"#5e5ce6",buttons:"#bf5af2",quiz:"#bf5af2",flashcards:"#ff375f",tabs:"#0a84ff",accordion:"#40c8e0",timer:"#ff453a",clock:"#64d2ff",diagram:"#0a84ff",mindmap:"#30d158",map:"#30d158",weather:"#64d2ff",kanban:"#5e5ce6",recipe:"#ff9f0a",itinerary:"#40c8e0",decide:"#5e5ce6",palette:"#ff375f",gantt:"#64d2ff",run:"#30d158"};
+const sty = document.createElement("style"); sty.textContent = Object.entries(TC).map(([k, c]) => `.kx[data-kx="${k}"]{--accent:${c};--accent2:color-mix(in srgb,${c} 70%,#fff)}`).join(""); document.head.appendChild(sty);
+const rg = r => r.style.setProperty("--p", ((r.value - (r.min || 0)) / (((r.max || 100) - (r.min || 0)) || 1) * 100) + "%");
+document.addEventListener("input", e => { if(e.target.matches && e.target.matches(".kx input[type=range]")) rg(e.target); });
+function burst(el, n){
+  if(reduce || !el) return; const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, C = ["#5b9bff","#3ecf8e","#f5a524","#ef5b5b","#a78bfa","#f472b6"];
+  for(let i = 0; i < (n || 24); i++){
+    const p = document.createElement("i"), a = Math.random() * 6.28, v = 60 + Math.random() * 130; p.className = "x-cf";
+    p.style.cssText = `left:${x}px;top:${y}px;background:${C[i % 6]};width:${5 + Math.random() * 4}px;height:${7 + Math.random() * 5}px`; document.body.appendChild(p);
+    p.animate([{transform: "none", opacity: 1}, {transform: `translate(${Math.cos(a) * v}px,${Math.sin(a) * v - 50}px) rotate(${Math.random() * 540}deg)`, opacity: 1, offset: .55}, {transform: `translate(${Math.cos(a) * v * 1.15}px,${Math.sin(a) * v + 90}px) rotate(${Math.random() * 720}deg)`, opacity: 0}], {duration: 900 + Math.random() * 500, easing: "cubic-bezier(.2,.7,.3,1)"}).onfinish = () => p.remove();
+  }
+}
+if(document.startViewTransition) document.documentElement.classList.add("vt");
+function focus(root, on){
+  if(document.startViewTransition && !reduce){ root.style.viewTransitionName = "kxv"; const t = document.startViewTransition(() => focus0(root, on)); t.finished.finally(() => { root.style.viewTransitionName = ""; }); return; }
+  focus0(root, on);
+}
+function focus0(root, on){
+  if(on === undefined) on = !root.classList.contains("kx-full");
+  $$(document, ".kx-full").forEach(r => { r.classList.remove("kx-full"); const b = r.querySelector(".xf"); if(b) b.innerHTML = IX.full; }); $$(document, ".kx-bd").forEach(b => b.remove());
+  if(on){ root.classList.remove("kx-min"); root.classList.add("kx-full"); root.querySelector(".xf").innerHTML = IX.close; const d = document.createElement("div"); d.className = "kx-bd"; d.onclick = () => focus(root, false); document.body.appendChild(d); }
+}
+/* timeline tour */
+function tlShow(root){
+  const m = root.querySelector(".kx-main"), L = m && m.querySelector(".kx-tl"); if(!L) return; const ev = $$(L, ".kx-ev"), i = root._ti2;
+  ev.forEach((e, k) => { e.classList.toggle("cur", k === i); if(k === i) e.classList.add("on"); }); L.style.setProperty("--p", i == null ? 0 : i / Math.max(1, ev.length - 1));
+  const n = m.querySelector(".x-n"); if(n) n.textContent = i == null ? ev.length + " events" : (i + 1) + " / " + ev.length;
+  const g = m.querySelector('[data-x="tlg"]'); if(g){ g.classList.toggle("on", !!root._tp); g.innerHTML = root._tp ? IX.pause + "Pause" : IX.play + "Play through"; }
+}
+function tlStop(root){ clearInterval(root._tp); root._tp = 0; }
+function tlStep(root, d, manual){
+  if(manual) tlStop(root); const n = $$(root, ".kx-ev").length; if(!n) return;
+  root._ti2 = root._ti2 == null ? (d > 0 ? 0 : n - 1) : Math.min(n - 1, Math.max(0, root._ti2 + d));
+  if(root._tp && root._ti2 >= n - 1) tlStop(root); tlShow(root);
+}
+function tlPlay(root){
+  if(root._tp){ tlStop(root); return tlShow(root); }
+  const n = $$(root, ".kx-ev").length; if(root._ti2 == null || root._ti2 >= n - 1) root._ti2 = -1;
+  root._tp = setInterval(() => { if(!root.isConnected) return tlStop(root); tlStep(root, 1); }, 1800); tlStep(root, 1);
+}
+/* per-block decoration (idempotent, re-run after every redraw) */
+const ctl = (m, html) => { const c = document.createElement("div"); c.className = "x-ctl"; c.innerHTML = html; m.prepend(c); };
+function deco(root){
+  const a = root.querySelector(":scope>.kx-h>.kx-acts");
+  if(a && !a.dataset.x){ a.dataset.x = 1; [["xf","Focus view",IX.full],["xr","Replay animation",IX.rep],["xc","Collapse",IX.min]].forEach(([c, t, h]) => { const b = document.createElement("button"); b.type = "button"; b.className = c; b.title = t; b.setAttribute("aria-label", t); b.dataset.x = c; b.innerHTML = h; a.prepend(b); }); }
+  const n = root.dataset.kx, m = root.querySelector(".kx-main"); if(!m) return;
+  const W = root._w || (root._w = {});
+  $$(m, ".kx-bar0>i,.kx-rk .bar>i").forEach((el, i) => { const to = el.style.width, from = W[i]; if(!to) return; W[i] = to; if(from && from !== to && !reduce){ el.style.transition = "none"; el.style.width = from; el.offsetWidth; el.style.transition = ""; el.style.width = to; } });
+  if(n === "tabs"){
+    const t = m.querySelector(".kx-tabs"), on = t && t.querySelector("button.on");
+    if(on && !t.querySelector(".x-ind")){ const i = document.createElement("i"); i.className = "x-ind"; t.appendChild(i); const p = root._tabi; if(p && !reduce){ i.style.left = p.l + "px"; i.style.width = p.w + "px"; i.offsetWidth; } i.style.left = on.offsetLeft + "px"; i.style.width = on.offsetWidth + "px"; root._tabi = {l: on.offsetLeft, w: on.offsetWidth}; }
+  }
+  if(n === "timeline" && !m.querySelector(".x-ctl") && $$(m, ".kx-ev").length > 1){ ctl(m, `<button type="button" class="x-b" data-x="tlp" title="Previous">${IX.prev}</button><button type="button" class="x-b" data-x="tlg"></button><button type="button" class="x-b" data-x="tln" title="Next">${IX.next}</button><span class="x-n"></span>`); tlShow(root); }
+  if(n === "accordion" && !m.querySelector(".x-ctl") && $$(m, ".kx-ac").length > 1) ctl(m, `<button type="button" class="x-b" data-x="acx">Expand all</button><button type="button" class="x-b" data-x="acc0">Collapse all</button>`);
+  $$(m, ".kx-seg").forEach((sg, si) => { const on = sg.querySelector("button.on"); if(!on || sg.querySelector(".x-thumb")) return; const i = document.createElement("i"); i.className = "x-thumb"; sg.prepend(i); const P = root._sg || (root._sg = {}), p = P[si]; if(p && !reduce){ i.style.left = p.l + "px"; i.style.width = p.w + "px"; i.offsetWidth; } i.style.left = on.offsetLeft + "px"; i.style.width = on.offsetWidth + "px"; P[si] = {l: on.offsetLeft, w: on.offsetWidth}; });
+  $$(m, "input[type=range]").forEach(rg);
+  const recent = Date.now() - (root._act || 0) < 900;
+  if(n === "checklist" || n === "steps"){ const all = $$(m, ".kx-ck,.kx-st"), d = all.length && all.every(x => x.classList.contains("on") || x.classList.contains("done")); if(d && !root._cel){ root._cel = 1; if(recent) burst(root.querySelector(".kx-prog,.kx-ck,.kx-st"), 30); } if(!d) root._cel = 0; }
+  if((n === "quiz" || n === "flashcards") && recent){ const ok = m.querySelector(".kx-opt.ok"); if(ok && !m.querySelector(".kx-opt.no")) burst(ok.querySelector(".k") || ok, 12); const big = m.querySelector(".kx-big"); if(big) burst(big, 32); }
+}
+let q = new Set(), raf = 0; const add = n => { if(n.nodeType !== 1) return; const r = n.closest(".kx"); if(r) q.add(r); else $$(n, ".kx").forEach(x => q.add(x)); };
+new MutationObserver(ms => { ms.forEach(m => m.addedNodes.forEach(add)); if(q.size && !raf) raf = requestAnimationFrame(() => { raf = 0; const s = q; q = new Set(); s.forEach(r => { try{ deco(r); }catch{} }); }); }).observe(document.body, {childList: true, subtree: true});
+setTimeout(() => $$(document, ".kx").forEach(deco), 300);
+/* interactions */
+document.addEventListener("click", e => {
+  const root = e.target.closest && e.target.closest(".kx"); if(!root) return; root._act = Date.now();
+  const x = e.target.closest("[data-x]");
+  if(x && root.contains(x)){
+    const k = x.dataset.x;
+    if(k === "xc"){ const on = root.classList.toggle("kx-min"); x.title = on ? "Expand" : "Collapse"; if(!on){ root.classList.add("kx-pop"); setTimeout(() => root.classList.remove("kx-pop"), 350); } }
+    else if(k === "xr"){ x.classList.remove("spin"); x.offsetWidth; x.classList.add("spin"); root.classList.add("kx-still"); root.offsetWidth; root.classList.remove("kx-still"); }
+    else if(k === "xf") focus(root);
+    else if(k === "tlg") tlPlay(root); else if(k === "tlp") tlStep(root, -1, true); else if(k === "tln") tlStep(root, 1, true);
+    else if(k === "acx" || k === "acc0"){ const want = k === "acx", c = $$(root, ".kx-ac").length; for(let i = 0; i < c; i++){ const ac = $$(root, ".kx-ac")[i]; if(ac && ac.classList.contains("on") !== want) ac.querySelector("button").click(); } }
+    return;
+  }
+  const cp = e.target.closest('[data-a="kxcopy"]');
+  if(cp){ if(!cp._h) cp._h = cp.innerHTML; cp.innerHTML = IX.ok; cp.style.color = "var(--ok)"; clearTimeout(cp._t); cp._t = setTimeout(() => { cp.innerHTML = cp._h; cp._h = null; cp.style.color = ""; }, 1300); return; }
+  const sw = e.target.closest(".kx-swc"); if(sw){ sw.classList.remove("xcp"); sw.offsetWidth; sw.classList.add("xcp"); toast("Copied " + (sw.dataset.v || "")); return; }
+  if(e.target.closest('[data-a="css"]')) toast("CSS variables copied");
+  const st = e.target.closest(".kx-stat"); if(st){ st.classList.toggle("pin"); return; }
+  const cd = e.target.closest(".kx-card"); if(cd && !cd.matches("a,[data-a]")){ cd.classList.toggle("sel"); return; }
+  const td = e.target.closest(".kx-t td"); if(td){ td.parentElement.classList.toggle("sel"); return; }
+  const co = e.target.closest(".kx-co"); if(co && co.querySelector("b")) co.classList.toggle("fold");
+});
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape"){ const f = document.querySelector(".kx-full"); if(f) focus(f, false); }
+  const tb = e.target.closest && e.target.closest(".kx-tabs button");
+  if(tb && (e.key === "ArrowRight" || e.key === "ArrowLeft")){ const bs = $$(tb.parentNode, "button"), nx = bs[bs.indexOf(tb) + (e.key === "ArrowRight" ? 1 : -1)]; if(nx){ e.preventDefault(); nx.click(); } }
+});
+document.addEventListener("pointermove", e => {
+  const t = e.target.closest && e.target.closest(".kx-stat,.kx-card,.kx-chb,.kx-clk"); if(!t || e.pointerType === "touch") return;
+  const r = t.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+  t.style.setProperty("--mx", px * 100 + "%"); t.style.setProperty("--my", py * 100 + "%");
+  if(!reduce && t.matches(".kx-stat,.kx-card")){ t.style.setProperty("--ry", (px - .5) * 4 + "deg"); t.style.setProperty("--rx", (.5 - py) * 4 + "deg"); }
+}, {passive: true});
+document.addEventListener("pointerout", e => { const t = e.target.closest && e.target.closest(".kx-stat,.kx-card"); if(t && !t.contains(e.relatedTarget)){ t.style.removeProperty("--rx"); t.style.removeProperty("--ry"); } });
+})();
 </script>
 </body>
 </html>
